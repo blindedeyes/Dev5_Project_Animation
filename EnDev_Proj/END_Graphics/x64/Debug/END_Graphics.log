@@ -1,0 +1,11 @@
+﻿  compilation header save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\END_Graphics\Trivial_PS.csh
+  compilation object save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\x64\Debug\Trivial_PS.cso
+  compilation header save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\END_Graphics\Trivial_VS.csh
+  compilation object save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\x64\Debug\Trivial_VS.cso
+  stdafx.cpp
+  pipelineManager.cpp
+c:\users\lord\documents\visual studio 2015\projects\eendev_engine\endev_proj\end_graphics\pipelinemanager.cpp(220): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\eendev_engine\endev_proj\end_graphics\pipelinemanager.cpp(221): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+  END_Graphics.cpp
+  Generating Code...
+LINK : fatal error LNK1104: cannot open file 'C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\x64\Debug\bFBX_CONVERT.lib'

@@ -1,0 +1,9 @@
+﻿  stdafx.cpp
+  clsFBXWrap.cpp
+  FBX_CONV.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  dllmain.cpp
+     Creating library C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\Debug\FBX_CONV.lib and object C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\Debug\FBX_CONV.exp
+  FBX_CONV.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\Debug\FBX_CONV.dll
+  FBX_CONV.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\Debug\FBX_CONV.pdb (Full PDB)
