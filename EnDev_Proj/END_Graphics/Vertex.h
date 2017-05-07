@@ -29,7 +29,7 @@ struct vertex
 struct Bone
 {
 	vertex v;
-
+	Bone * parent = nullptr;
 	std::vector<Bone> children;
 };
 struct Mesh
@@ -101,8 +101,7 @@ struct RenderObject
 	}
 	~RenderObject()
 	{
-		if (indexBuffer) indexBuffer->Release();
-		if (vertexBuffer) vertexBuffer->Release();
+
 	}
 };
 

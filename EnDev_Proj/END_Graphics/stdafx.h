@@ -34,4 +34,4 @@
 #include "pipelineManager.h"
 
 //DLL INCLUDE
-#include "clsFBXWrap.h"
+#include "..\FBX_CONV\clsFBXWrap.h"

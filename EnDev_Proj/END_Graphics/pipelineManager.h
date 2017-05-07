@@ -45,7 +45,7 @@ public:
 
 	pipelineManager();
 
-	void AppendDebugBones(Bone b);
+	void AppendDebugBones(Bone b, vertex parent);
 
 
 	void InitPipeline(HWND hWnd);

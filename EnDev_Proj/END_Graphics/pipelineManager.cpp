@@ -60,13 +60,33 @@ void pipelineManager::InitShaders()
 
 }
 
-void pipelineManager::AppendDebugBones(Bone b)
+void pipelineManager::AppendDebugBones(Bone b,vertex parent)
 {
+	parent.x += b.v.x;
+	parent.y += b.v.y;
+	parent.z += b.v.z;
 
 	for (unsigned int j = 0; j <b.children.size(); j++)
 	{
-		debugObjects.AddLine(b.v, b.children[j].v);
-		AppendDebugBones(b.children[j]);
+		vertex end = b.children[j].v;
+		end.x += parent.x;
+		end.y += parent.y;
+		end.z += parent.z;
+		/*
+		if (b.parent)
+		{
+			end.x += parent.x;
+			end.y += parent.y;
+			end.z += parent.z;
+		}
+		else
+		{
+
+		}
+		*/
+
+		debugObjects.AddLine(parent, end);
+		AppendDebugBones(b.children[j], parent);
 	}
 }
 void pipelineManager::CreateTriangle()
@@ -115,7 +135,7 @@ void pipelineManager::CreateTriangle()
 		}
 		else
 		{
-			AppendDebugBones(meshes[i].root);
+			AppendDebugBones(meshes[i].root, vertex(0,0,0,0,1,1,1,1));
 		}
 	}
 	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i)
@@ -465,7 +485,6 @@ void pipelineManager::Drawstate()
 	DrawPipeLine(default_pipeline);
 	if (debugMode)
 	{
-
 		DrawDebugObjecs();
 	}
 	//DrawDebugPipeline(debug_Pipeline);
@@ -504,7 +523,7 @@ void pipelineManager::DrawDebugObjecs()
 
 	D3D11_MAPPED_SUBRESOURCE ms1;
 	devContext->Map(debugObjects.vertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms1);   // map the buffer
-	memcpy(ms1.pData, debugObjects.lineVerts, sizeof(vertex));
+	memcpy(ms1.pData, debugObjects.lineVerts, sizeof(vertex)*debugObjects.CurrentCount);
 	// copy the data
 	//context->Map(m_vertexParticleBuffer.p, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms2);   // map the buffer
 	//memcpy(ms2.pData, ms1.pData, sizeof(particleData));           // copy the data
@@ -513,6 +532,8 @@ void pipelineManager::DrawDebugObjecs()
 
 	UINT stride = sizeof(vertex);
 	UINT offset = 0;
+
+	DirectX::XMStoreFloat4x4(&bufferData.world[0], DirectX::XMMatrixIdentity());
 
 	devContext->VSSetShader(default_pipeline.vertex_shader.p, 0, 0);
 	devContext->VSSetConstantBuffers(0, 1, &cbWorldBuffer.p);
@@ -544,8 +565,16 @@ pipelineManager::~pipelineManager()
 
 
 	//Release
-	triangleVBuffer.Release();
+	//triangleVBuffer.Release();
+	transformVBuffer.Release();
 	//backBuffer.Release();
+	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i) {
+
+		default_pipeline.rendObjects[i].indexBuffer->Release();
+		default_pipeline.rendObjects[i].vertexBuffer->Release();
+		
+	}
+	debugObjects.vertexBuffer->Release();
 
 	default_pipeline.pixel_shader.Release();
 	default_pipeline.input_layout.Release();
@@ -565,7 +594,8 @@ pipelineManager::~pipelineManager()
 	default_pipeline.pixel_shader.p = nullptr;;
 	default_pipeline.render_target.p = nullptr;;
 	default_pipeline.vertex_shader.p = nullptr;;
-	triangleVBuffer.p = nullptr;
+
+	//triangleVBuffer.p = nullptr;
 	//backBuffer.p = nullptr;
 	swapChain.p = nullptr;
 	devContext.p = nullptr;

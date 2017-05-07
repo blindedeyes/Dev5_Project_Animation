@@ -113,15 +113,11 @@ namespace bFBX_CONVERT
 			nb.v.x = trans[0];
 			nb.v.y = trans[1];
 			nb.v.z = trans[2];
+			nb.v.w = 1;
 			nb.v.r = 1;
 			nb.v.g = 1;
 			nb.v.b = 1;
 			nb.v.a = 1;
-
-
-
-
-
 			AddBonePost(nb, child);
 			b.children.push_back(nb);
 		}
@@ -191,6 +187,7 @@ namespace bFBX_CONVERT
 						vert.x = temporaryVerts[indx].x;
 						vert.y = temporaryVerts[indx].y;
 						vert.z = temporaryVerts[indx].z;
+						vert.w = 1;
 						vert.r = uv[0];
 						vert.g = uv[1];
 						vert.b = 0;
@@ -213,9 +210,12 @@ namespace bFBX_CONVERT
 					{
 						//I'm a bone.
 						FbxDouble3 trans = child->LclTranslation.Get();
+						
+						
 						m.root.v.x = trans[0];
 						m.root.v.y = trans[1];
 						m.root.v.z = trans[2];
+						m.root.v.w = 1;
 						//m.root.v.color = 0xFFFFFFFF;
 						m.root.v.r = 1;
 						m.root.v.b = 1;

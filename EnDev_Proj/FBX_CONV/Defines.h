@@ -26,6 +26,7 @@ struct vertex
 struct Bone
 {
 	vertex v;
+	Bone * parent = nullptr;
 	std::vector<Bone> children;
 };
 struct Mesh
