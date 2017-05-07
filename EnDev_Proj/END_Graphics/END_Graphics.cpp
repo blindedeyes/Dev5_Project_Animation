@@ -50,11 +50,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	FILE* new_std_in_out;
 	freopen_s(&new_std_in_out, "CONOUT$", "w", stdout);
 	freopen_s(&new_std_in_out, "CONIN$", "r", stdin);
-	bFBX_CONVERT::clsFBXWrapper obj;
 	std::cout << "Hello World!\n";
-	char c = obj.test();
-	std::cout<<(c);
-	obj.SetupFBX("battleMage.fbx");
 	
 
 #endif // !NDEBUG

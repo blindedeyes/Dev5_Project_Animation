@@ -14,6 +14,7 @@
 
 
 // TODO: reference additional headers your program requires here
-
+#include "Defines.h"
 #include <fbxsdk.h>
 #include "clsFBXWrap.h"
+#include <iostream>

@@ -101,7 +101,136 @@ namespace bFBX_CONVERT
 		PrintTabs();
 		printf("</node>\n");
 	}
-	DLLHANDLER void clsFBXWrapper::SetupFBX(const char * filename)
+
+	void AddBonePost(Bone &b, FbxNode* node)
+	{
+		unsigned int childrenCnt = node->GetChildCount();
+		for (unsigned int i = 0; i < childrenCnt; i++)
+		{
+			FbxNode *child = node->GetChild(i);
+			Bone nb;
+			FbxDouble3 trans = child->LclTranslation.Get();
+			nb.v.x = trans[0];
+			nb.v.y = trans[1];
+			nb.v.z = trans[2];
+			nb.v.r = 1;
+			nb.v.g = 1;
+			nb.v.b = 1;
+			nb.v.a = 1;
+
+
+
+
+
+			AddBonePost(nb, child);
+			b.children.push_back(nb);
+		}
+	}
+
+	DLLHANDLER std::vector<Mesh> LoadRoot(FbxNode * root)
+	{
+		std::vector<Mesh> res;
+		const int numChilds = root->GetChildCount();
+		FbxNode* child = nullptr;
+		
+		for (int i = 0; i < numChilds; ++i)
+		{
+			child = root->GetChild(i);
+			
+			//Get the fbxmesh of the node
+			FbxMesh * thisMesh = child->GetMesh();
+
+			//If it actually has a mesh, lets get its stuff
+			if (thisMesh)
+			{
+				printf("FOUND A MESH\n");
+				printf(child->GetName());
+				printf("\n");
+				//Make one of my mesh objects to store the data
+				Mesh m;
+
+
+				//==This is the logic for verts===================================
+				//how many verts?
+				int vertCnt = thisMesh->GetControlPointsCount();
+				std::vector<vertex> temporaryVerts;
+				for (int v = 0; v < vertCnt; ++v)
+				{
+
+					FbxVector4 vert = thisMesh->GetControlPointAt(v);
+					vertex myVert;
+					for (int i = 0; i < 3; ++i)
+						myVert.pos[i] = (float)vert.mData[i];
+					temporaryVerts.push_back(myVert);
+
+				}
+				//================================================================
+
+				//==For indices===================================================
+				int indCnt = thisMesh->GetPolygonVertexCount();
+				int polyCnt = thisMesh->GetPolygonCount();
+				//m.indices = new int[indCnt];
+				//printf("%d", sizeof(m.indices));
+				//==============================================somany============
+
+				//get vert uv data
+				FbxStringList uvsetlist;
+				thisMesh->GetUVSetNames(uvsetlist);
+				for (int p = 0; p < polyCnt; ++p)
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						FbxVector2 uv;
+						bool unmapped;
+						FbxVector4 normal;
+						thisMesh->GetPolygonVertexUV(p, i, uvsetlist.GetStringAt(0), uv, unmapped);
+						int indx = thisMesh->GetPolygonVertex(p, i);
+						thisMesh->GetPolygonVertexNormal(p, i, normal);
+						m.indices.push_back(m.verts.size());
+						vertex vert;
+						vert.x = temporaryVerts[indx].x;
+						vert.y = temporaryVerts[indx].y;
+						vert.z = temporaryVerts[indx].z;
+						vert.r = uv[0];
+						vert.g = uv[1];
+						vert.b = 0;
+						vert.a = 1;
+						m.verts.push_back(vert);
+					}
+				}
+				//m.verts.push_back(myVert);
+
+				res.push_back(m);
+			}
+			else //IF node isn't a mesh
+			{
+				int attribs = child->GetNodeAttributeCount();
+				Mesh m;
+				for (int attrI = 0; attrI < attribs; ++attrI)
+				{
+					FbxNodeAttribute * attrb = child->GetNodeAttributeByIndex(attrI);
+					if (attrb->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+					{
+						//I'm a bone.
+						FbxDouble3 trans = child->LclTranslation.Get();
+						m.root.v.x = trans[0];
+						m.root.v.y = trans[1];
+						m.root.v.z = trans[2];
+						//m.root.v.color = 0xFFFFFFFF;
+						m.root.v.r = 1;
+						m.root.v.b = 1;
+						m.root.v.g = 1;
+						m.root.v.a = 1;
+						AddBonePost(m.root, child);
+						break;
+					}
+				}
+				res.push_back(m);
+			}
+		}
+		return res;
+	}
+	DLLHANDLER std::vector<Mesh> clsFBXWrapper::LoadFBXFile(const char * filename)
 	{
 
 		// Change the following filename to a suitable filename value.
@@ -134,10 +263,22 @@ namespace bFBX_CONVERT
 		// The file is imported; so get rid of the importer.
 		lImporter->Destroy();
 
+		//Used to triangulate scene
+		FbxGeometryConverter conv(lSdkManager);
+		//the scene to triangulate, and if to override the existing scene
+		if (conv.Triangulate(lScene, true) == false)
+		{
+			//if failed, return;
+			return std::vector<Mesh>();
+		}
 		// Print the nodes of the scene and their attributes recursively.
 		// Note that we are not printing the root node because it should
 		// not contain any attributes.
+
+		//This node is how to tell where objects are.
 		FbxNode* lRootNode = lScene->GetRootNode();
+
+		std::vector<Mesh> msh = LoadRoot(lRootNode);
 		if (lRootNode)
 		{
 			for (int i = 0; i < lRootNode->GetChildCount(); i++)
@@ -145,6 +286,6 @@ namespace bFBX_CONVERT
 		}
 		// Destroy the SDK manager and all the other objects it was handling.
 		lSdkManager->Destroy();
-		return;
+		return msh;
 	}
 }

@@ -1,8 +1,7 @@
-﻿  stdafx.cpp
-  pipelineManager.cpp
-c:\users\lord\documents\visual studio 2015\projects\eendev_engine\endev_proj\end_graphics\pipelinemanager.cpp(220): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\eendev_engine\endev_proj\end_graphics\pipelinemanager.cpp(221): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-  END_Graphics.cpp
-  Generating Code...
-  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\Debug\END_Graphics.exe
-  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\EenDev_Engine\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)
+﻿  pipelineManager.cpp
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(261): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(262): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(394): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(395): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.exe
+  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)

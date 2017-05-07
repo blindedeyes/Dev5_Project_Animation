@@ -17,11 +17,18 @@ class pipelineManager
 	D3D11_VIEWPORT vPort;
 
 	pipelineState default_pipeline;
+	pipelineState debug_Pipeline;
 
 	cWorldData bufferData;
+	DirectX::XMFLOAT4X4 Camera;
 
 	DirectX::XMFLOAT4X4 transformPos[4];
 
+	bool debugMode=false;
+	DebugObjects debugObjects;
+
+
+	POINT mPrevPoint;
 	//Init
 	void InitDepthBuffer(ID3D11Texture2D ** text, int width, int height);
 
@@ -32,12 +39,14 @@ class pipelineManager
 
 	void CreateTriangle();
 	void CreateTransform();
+	void UpdateCamera(float delta_time);
 public:
 
 
 	pipelineManager();
 
-	
+	void AppendDebugBones(Bone b);
+
 
 	void InitPipeline(HWND hWnd);
 
@@ -45,7 +54,8 @@ public:
 	void ClearBuffers();
 	void Drawstate();
 	void Swap();
-
+	void DrawPipeLine(const pipelineState &state);
+	void DrawDebugObjecs();
 
 
 	~pipelineManager();

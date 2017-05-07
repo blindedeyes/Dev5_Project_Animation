@@ -1,10 +1,12 @@
 #pragma once
-
+#include <vector>
 #ifdef FBX_CONV_EXPORTS  
 #define DLLHANDLER __declspec(dllexport)   
 #else  
 #define DLLHANDLER __declspec(dllimport)   
 #endif  
+
+
 
 namespace bFBX_CONVERT
 {
@@ -18,7 +20,7 @@ namespace bFBX_CONVERT
 
 		// Returns a + b  
 		DLLHANDLER char test() { return 'a'; };
-		DLLHANDLER void SetupFBX(const char * filename);
+		DLLHANDLER std::vector<Mesh> LoadFBXFile(const char * filename);
 
 		/*DLLHANDLER void PrintTabs();
 		DLLHANDLER void PrintNode(FbxNode* pNode);

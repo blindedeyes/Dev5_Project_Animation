@@ -25,6 +25,7 @@
 #include <atlcomcli.h>
 #include <DirectXPackedVector.h>
 #include <DXGIDebug.h>
+#include <vector>
 
 // TODO: reference additional headers your program requires here
 #include "Vertex.h"
