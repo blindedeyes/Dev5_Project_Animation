@@ -60,13 +60,13 @@ void pipelineManager::InitShaders()
 
 }
 
-void pipelineManager::AppendDebugBones(Bone b,vertex parent)
+void pipelineManager::AppendDebugBones(Bone b, vertex parent)
 {
 	parent.x += b.v.x;
 	parent.y += b.v.y;
 	parent.z += b.v.z;
 
-	for (unsigned int j = 0; j <b.children.size(); j++)
+	for (unsigned int j = 0; j < b.children.size(); j++)
 	{
 		vertex end = b.children[j].v;
 		end.x += parent.x;
@@ -135,7 +135,7 @@ void pipelineManager::CreateTriangle()
 		}
 		else
 		{
-			AppendDebugBones(meshes[i].root, vertex(0,0,0,0,1,1,1,1));
+			AppendDebugBones(meshes[i].root, vertex(0, 0, 0, 0, 1, 1, 1, 1));
 		}
 	}
 	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i)
@@ -150,8 +150,9 @@ void pipelineManager::CreateTriangle()
 
 }
 
-void pipelineManager::CreateTransform()
+void pipelineManager::CreatePlane()
 {
+#if 0
 	//setup the transform.
 	//transformVBuffer
 	vertex verts[6];
@@ -206,7 +207,48 @@ void pipelineManager::CreateTransform()
 	DirectX::XMStoreFloat4x4(&transformPos[2], DirectX::XMMatrixIdentity());
 	DirectX::XMStoreFloat4x4(&transformPos[3], DirectX::XMMatrixIdentity());
 
+#endif
+	//setup the transform.
+	//transformVBuffer
+	vertex verts[4];
+	////Z
+	//verts[0].color = { 0.0f, 0.0f, 1.0f, 0.0f };
+	//verts[0].pos = { 0,0,0,1 };
+	verts[0] = vertex(1, 0, 1, 1, 1, 1, 1, 1);
+	//verts[1].color = { 0,0,1.0f,0 };
+	//verts[1].pos = { 0,0,1,1 };
+	verts[1] = vertex(-1, 0, 1, 1, 1, 1, 1, 1);
 
+	////Y
+	//verts[2].color = { 0,1.0f,0,0 };
+	//verts[2].pos = { 0,0,0,1 };
+	verts[2] = vertex(-1, 0, -1, 1, 1, 1, 1, 1);
+
+	//verts[3].color = { 0,1.0f,0,0 };
+	//verts[3].pos = { 0,1,0,1 };
+	verts[3] = vertex(1, 0, -1, 1, 1, 1, 1, 1);
+
+	RenderObject ro;
+
+	for (unsigned int i = 0; i < 6; ++i)
+		ro.mesh.verts.push_back(verts[i]);
+
+	ro.mesh.indices.push_back(0);
+	ro.mesh.indices.push_back(1);
+	ro.mesh.indices.push_back(2);
+	ro.mesh.indices.push_back(3);
+	ro.mesh.indices.push_back(0);
+	ro.mesh.indices.push_back(2);
+
+	default_pipeline.rendObjects.push_back(ro);
+	default_pipeline.rendObjects[default_pipeline.rendObjects.size()-1].createBuffer(device);
+	default_pipeline.rendObjects[default_pipeline.rendObjects.size()-1].createIndex(device);
+	
+	CD3D11_BUFFER_DESC constantBufferDesc(sizeof(cWorldData), D3D11_BIND_CONSTANT_BUFFER);
+
+
+
+	device->CreateBuffer(&constantBufferDesc, NULL, &cbWorldBuffer.p);
 
 }
 
@@ -302,7 +344,7 @@ void pipelineManager::InitPipeline(HWND hWnd)
 	DirectX::XMStoreFloat4x4(&Camera, DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixLookAtLH(eye, at, up)));
 
 	CreateTriangle();
-	CreateTransform();
+	CreatePlane();
 }
 
 void pipelineManager::Update()
@@ -502,15 +544,19 @@ void pipelineManager::DrawPipeLine(const pipelineState &state)
 	devContext->VSSetConstantBuffers(0, 1, &cbWorldBuffer.p);
 	devContext->PSSetShader(state.pixel_shader.p, 0, 0);
 	devContext->IASetInputLayout(state.input_layout);
-	devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	for (unsigned int i = 0; i < state.rendObjects.size(); ++i)
 	{
 		devContext->IASetVertexBuffers(0, 1, &state.rendObjects[i].vertexBuffer, &stride, &offset);
-		devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		//devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		devContext->IASetIndexBuffer(state.rendObjects[i].wireIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		//devContext->DrawInstanced(6, 4, 0, 0);
-		devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.indices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
+		//devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.indices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
+		devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.wireIndices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
 	}
 }
 
@@ -572,7 +618,7 @@ pipelineManager::~pipelineManager()
 
 		default_pipeline.rendObjects[i].indexBuffer->Release();
 		default_pipeline.rendObjects[i].vertexBuffer->Release();
-		
+
 	}
 	debugObjects.vertexBuffer->Release();
 

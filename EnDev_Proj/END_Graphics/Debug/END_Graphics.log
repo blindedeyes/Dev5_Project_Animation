@@ -1,10 +1,7 @@
-﻿  stdafx.cpp
-  pipelineManager.cpp
-c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(281): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(282): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(414): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
-c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(415): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
-  END_Graphics.cpp
-  Generating Code...
+﻿  pipelineManager.cpp
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(323): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(324): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(456): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(457): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
   END_Graphics.vcxproj -> C:\Users\Desky-chan\Documents\Visual Studio 2015\Projects\RTAProject\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.exe
   END_Graphics.vcxproj -> C:\Users\Desky-chan\Documents\Visual Studio 2015\Projects\RTAProject\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)

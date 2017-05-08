@@ -19,7 +19,9 @@ struct vertex
 		struct { float r, g, b, a; };
 		float color[4];
 	};
-	vertex() {};
+
+	vertex() : color{ 1,1,1,1 }, pos{ 0,0,0,0 } {
+	};
 	vertex(float _x, float _y, float _z, float _w, float _r, float _g, float _b, float _a)
 		: x{ _x }, y{ _y }, z{ _z }, w{ _w }, r{ _r }, g{ _g }, b{ _b }, a{ _a }
 	{
@@ -40,6 +42,7 @@ struct Mesh
 	Bone root;
 	//array of tri indexes
 	std::vector<unsigned int> indices;
+	std::vector<unsigned int> wireIndices;
 	//int* indices;
 };
 
@@ -52,6 +55,7 @@ struct RenderObject
 
 	ID3D11Buffer * vertexBuffer = nullptr;
 	ID3D11Buffer * indexBuffer = nullptr;
+	ID3D11Buffer * wireIndexBuffer = nullptr;
 
 	void createBuffer(ID3D11Device * device)
 	{
@@ -92,6 +96,25 @@ struct RenderObject
 		indexBufferData.SysMemSlicePitch = 0;
 		CD3D11_BUFFER_DESC indexBufferDesc(sizeof(unsigned int) *  mesh.indices.size(), D3D11_BIND_INDEX_BUFFER);
 		device->CreateBuffer(&indexBufferDesc, &indexBufferData, &indexBuffer);
+
+		
+		unsigned int i;
+		for (i = 0; i < mesh.indices.size(); i += 3) {
+			//print the faces in wire frame, 0 to 1, 1 to 2, 2 to 0 should work?
+			mesh.wireIndices.push_back(mesh.indices[i]);
+			mesh.wireIndices.push_back(mesh.indices[i+1]);
+			mesh.wireIndices.push_back(mesh.indices[i+1]);
+			mesh.wireIndices.push_back(mesh.indices[i+2]);
+			mesh.wireIndices.push_back(mesh.indices[i+2]);
+			mesh.wireIndices.push_back(mesh.indices[i]);
+		}
+
+		D3D11_SUBRESOURCE_DATA wireframeindexBufferData = { 0 };
+		wireframeindexBufferData.pSysMem = mesh.wireIndices.data();
+		wireframeindexBufferData.SysMemPitch = 0;
+		wireframeindexBufferData.SysMemSlicePitch = 0;
+		CD3D11_BUFFER_DESC wireframeindexBufferDesc(sizeof(unsigned int) *  mesh.wireIndices.size(), D3D11_BIND_INDEX_BUFFER);
+		device->CreateBuffer(&wireframeindexBufferDesc, &wireframeindexBufferData, &wireIndexBuffer);
 
 	}
 

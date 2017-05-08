@@ -38,7 +38,7 @@ class pipelineManager
 	void InitShaders();
 
 	void CreateTriangle();
-	void CreateTransform();
+	void CreatePlane();
 	void UpdateCamera(float delta_time);
 public:
 

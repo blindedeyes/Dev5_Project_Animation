@@ -14,7 +14,7 @@ struct vertex
 		float color[4];
 	};
 
-	vertex() {
+	vertex() : color{ 1,1,1,1 }, pos{ 0,0,0,0 } {
 	};
 	vertex(float _x, float _y, float _z, float _w, float _r, float _g, float _b, float _a)
 		: x{ _x }, y{ _y }, z{ _z }, w{ _w }, r{ _r }, g{ _g }, b{ _b }, a{ _a }
@@ -36,5 +36,6 @@ struct Mesh
 	Bone root;
 	//array of tri indexes
 	std::vector<unsigned int> indices;
+	std::vector<unsigned int> wireIndices;
 	//int* indices;
 };
