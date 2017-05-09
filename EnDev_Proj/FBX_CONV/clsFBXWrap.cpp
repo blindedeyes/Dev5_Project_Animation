@@ -264,8 +264,9 @@ namespace bFBX_CONVERT
 		lImporter->Destroy();
 
 		//Used to triangulate scene
-		FbxGeometryConverter conv(lSdkManager);
 		//the scene to triangulate, and if to override the existing scene
+		FbxGeometryConverter conv(lSdkManager);
+		
 		if (conv.Triangulate(lScene, true) == false)
 		{
 			//if failed, return;

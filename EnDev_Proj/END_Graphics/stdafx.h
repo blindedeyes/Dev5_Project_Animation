@@ -26,6 +26,7 @@
 #include <DirectXPackedVector.h>
 #include <DXGIDebug.h>
 #include <vector>
+#include <chrono>
 
 // TODO: reference additional headers your program requires here
 #include "Vertex.h"

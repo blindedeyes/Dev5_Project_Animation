@@ -55,7 +55,7 @@ struct RenderObject
 
 	ID3D11Buffer * vertexBuffer = nullptr;
 	ID3D11Buffer * indexBuffer = nullptr;
-	ID3D11Buffer * wireIndexBuffer = nullptr;
+	//ID3D11Buffer * wireIndexBuffer = nullptr;
 
 	void createBuffer(ID3D11Device * device)
 	{
@@ -97,7 +97,7 @@ struct RenderObject
 		CD3D11_BUFFER_DESC indexBufferDesc(sizeof(unsigned int) *  mesh.indices.size(), D3D11_BIND_INDEX_BUFFER);
 		device->CreateBuffer(&indexBufferDesc, &indexBufferData, &indexBuffer);
 
-		
+		/*
 		unsigned int i;
 		for (i = 0; i < mesh.indices.size(); i += 3) {
 			//print the faces in wire frame, 0 to 1, 1 to 2, 2 to 0 should work?
@@ -115,7 +115,7 @@ struct RenderObject
 		wireframeindexBufferData.SysMemSlicePitch = 0;
 		CD3D11_BUFFER_DESC wireframeindexBufferDesc(sizeof(unsigned int) *  mesh.wireIndices.size(), D3D11_BIND_INDEX_BUFFER);
 		device->CreateBuffer(&wireframeindexBufferDesc, &wireframeindexBufferData, &wireIndexBuffer);
-
+		*/
 	}
 
 	RenderObject()
@@ -134,6 +134,7 @@ struct DebugObjects
 	vertex * lineVerts=nullptr;
 	unsigned int MaxCnt;
 	unsigned int CurrentCount=0;
+	
 	DebugObjects(unsigned int MaxLineCnt = 1000)
 	{
 		MaxCnt = MaxLineCnt*2;
@@ -179,6 +180,7 @@ struct DebugObjects
 	}
 
 };
+
 struct cWorldData
 {
 	DirectX::XMFLOAT4X4 view;

@@ -122,8 +122,9 @@ void pipelineManager::CreateTriangle()
 	char c = obj.test();
 	std::cout << (c);
 
-	std::vector<Mesh> meshes = obj.LoadFBXFile("battleMage.fbx");
-
+	//std::vector<Mesh> meshes = obj.LoadFBXFile("battleMage.fbx");
+	std::vector<Mesh> meshes = obj.LoadFBXFile("Teddy_Run.fbx");
+	
 	//meshes[0]
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
@@ -234,11 +235,11 @@ void pipelineManager::CreatePlane()
 		ro.mesh.verts.push_back(verts[i]);
 
 	ro.mesh.indices.push_back(0);
+	ro.mesh.indices.push_back(2);
 	ro.mesh.indices.push_back(1);
-	ro.mesh.indices.push_back(2);
 	ro.mesh.indices.push_back(3);
-	ro.mesh.indices.push_back(0);
 	ro.mesh.indices.push_back(2);
+	ro.mesh.indices.push_back(0);
 
 	default_pipeline.rendObjects.push_back(ro);
 	default_pipeline.rendObjects[default_pipeline.rendObjects.size()-1].createBuffer(device);
@@ -332,7 +333,7 @@ void pipelineManager::InitPipeline(HWND hWnd)
 	InitDepthBuffer(&default_pipeline.depthStencilBuffer.p, width, height);
 	InitDepthView(default_pipeline.depthStencilBuffer.p, &default_pipeline.depthStencilView.p);
 
-	DirectX::XMMATRIX perspectiveMatrix = DirectX::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 100.0f);
+	DirectX::XMMATRIX perspectiveMatrix = DirectX::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 1000.0f);
 
 	DirectX::XMStoreFloat4x4(&bufferData.proj, DirectX::XMMatrixTranspose(perspectiveMatrix));
 	static const DirectX::XMVECTORF32 eye = { 1.0f, 3.5f, -2.5f, 0.0f };
@@ -343,11 +344,17 @@ void pipelineManager::InitPipeline(HWND hWnd)
 	DirectX::XMStoreFloat4x4(&bufferData.view, DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up)));
 	DirectX::XMStoreFloat4x4(&Camera, DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixLookAtLH(eye, at, up)));
 
+	D3D11_RASTERIZER_DESC desc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
+	desc.FillMode = D3D11_FILL_SOLID;
+	device->CreateRasterizerState(&desc, &default_pipeline.rasterState.p);
+	desc.FillMode = D3D11_FILL_WIREFRAME;
+	device->CreateRasterizerState(&desc, &default_pipeline.debugRasterState.p);
+
 	CreateTriangle();
 	CreatePlane();
 }
 
-void pipelineManager::Update()
+void pipelineManager::Update(float deltaTime)
 {
 	//Randomize legecy code
 //	{
@@ -394,16 +401,23 @@ void pipelineManager::Update()
 //		}
 //	}
 
-	if (GetAsyncKeyState(VK_RETURN) & 0x01)
-		debugMode = !debugMode;
-	if (GetActiveWindow() == mhWnd)
-		UpdateCamera(.0001f);
+	if (GetActiveWindow() == mhWnd) {
+		//UpdateCamera(.001f);
+		UpdateCamera(deltaTime);
+
+		if (GetAsyncKeyState(VK_RETURN) & 0x01)
+			debugMode = !debugMode;
+
+		if (GetAsyncKeyState(VK_SHIFT) & 0x01)
+			wireframeMode = !wireframeMode;
+	}
+	
 
 }
 
 void pipelineManager::UpdateCamera(float delta_time)
 {
-	const float moveSpd = 10;
+	const float moveSpd = 10.0f;
 
 	if (GetAsyncKeyState('W'))
 	{
@@ -452,7 +466,7 @@ void pipelineManager::UpdateCamera(float delta_time)
 	GetCursorPos(&curPoint);
 	if (GetAsyncKeyState(VK_RBUTTON))
 	{
-		float rotSpd = 30.0f;
+		float rotSpd = 20.0f;
 		float dx = curPoint.x - mPrevPoint.x;
 		float dy = curPoint.y - mPrevPoint.y;
 
@@ -537,6 +551,11 @@ void pipelineManager::DrawPipeLine(const pipelineState &state)
 	UINT stride = sizeof(vertex);
 	UINT offset = 0;
 
+	if (wireframeMode) 
+		devContext->RSSetState(state.debugRasterState.p);
+	else 
+		devContext->RSSetState(state.rasterState.p);
+
 	DirectX::XMStoreFloat4x4(&bufferData.world[0], DirectX::XMMatrixIdentity());
 	devContext->UpdateSubresource(cbWorldBuffer.p, 0, NULL, &bufferData, 0, 0);
 
@@ -546,17 +565,17 @@ void pipelineManager::DrawPipeLine(const pipelineState &state)
 	devContext->IASetInputLayout(state.input_layout);
 
 	//devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	for (unsigned int i = 0; i < state.rendObjects.size(); ++i)
 	{
 		devContext->IASetVertexBuffers(0, 1, &state.rendObjects[i].vertexBuffer, &stride, &offset);
-		//devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		devContext->IASetIndexBuffer(state.rendObjects[i].wireIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		//devContext->IASetIndexBuffer(state.rendObjects[i].wireIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 		//devContext->DrawInstanced(6, 4, 0, 0);
-		//devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.indices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
-		devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.wireIndices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
+		devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.indices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
+		//devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.wireIndices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
 	}
 }
 

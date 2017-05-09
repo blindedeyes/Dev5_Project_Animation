@@ -25,8 +25,9 @@ class pipelineManager
 	DirectX::XMFLOAT4X4 transformPos[4];
 
 	bool debugMode=false;
+	bool wireframeMode = false;
 	DebugObjects debugObjects;
-
+	
 
 	POINT mPrevPoint;
 	//Init
@@ -50,7 +51,7 @@ public:
 
 	void InitPipeline(HWND hWnd);
 
-	void Update();
+	void Update(float deltaTime);
 	void ClearBuffers();
 	void Drawstate();
 	void Swap();

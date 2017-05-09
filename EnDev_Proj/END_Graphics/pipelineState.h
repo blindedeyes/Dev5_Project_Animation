@@ -9,6 +9,7 @@ struct pipelineState
 	
 	CComPtr<ID3D11RenderTargetView> render_target;
 	CComPtr<ID3D11RasterizerState> rasterState;
+	CComPtr<ID3D11RasterizerState> debugRasterState;
 	
 	//The Input layout for these objects
 	CComPtr<ID3D11InputLayout> input_layout;

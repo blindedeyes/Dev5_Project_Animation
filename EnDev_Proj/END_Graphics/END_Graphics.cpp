@@ -74,11 +74,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		//Init directX here?
 		pipelineManager manager;
-
+		using namespace std::chrono;
 		manager.InitPipeline(hWnd);
 		bool running = true;
+		float deltaTime = 0;
 		while (running)
 		{
+			auto start = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
+
+
 			while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
 				if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -95,11 +99,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			//render
 			if (running)
 			{
-				manager.Update();
+				manager.Update(deltaTime);
 				manager.ClearBuffers();
 				manager.Drawstate();
 				manager.Swap();
 			}
+
+			//auto duration = system_clock::now().time_since_epoch();
+			auto end = duration_cast<nanoseconds>(system_clock::now().time_since_epoch()).count();
+
+			deltaTime = (end-start) *(1e-9);
 		}
 	}
 	//Removes console memory
