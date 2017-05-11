@@ -41,12 +41,14 @@ class pipelineManager
 	void CreateTriangle();
 	void CreatePlane();
 	void UpdateCamera(float delta_time);
+	void AppendDebugBones(Bone b);// , vertex parent);
+	void DebugDrawBones(Mesh &m);
+
 public:
 
 
 	pipelineManager();
 
-	void AppendDebugBones(Bone b, vertex parent);
 
 
 	void InitPipeline(HWND hWnd);

@@ -3,6 +3,8 @@
 
 struct vertex
 {
+	
+
 	union
 	{
 		struct { float x, y, z, w; };
@@ -23,12 +25,42 @@ struct vertex
 	}
 };
 
+struct AnimKey {
+	union {
+		struct {
+			float m11, m12, m13, m14,
+				m21, m22, m23, m24,
+				m31, m32, m33, m34,
+				m41, m42, m43, m44;
+		};
+		float data[16];
+	};
+	float KeyTime;
+};
+
+struct Animation {
+	std::vector<AnimKey> keys;
+};
+
 struct Bone
 {
 	vertex v;
+	union {
+		struct {
+			float m11, m12,m13, m14,
+				m21, m22, m23, m24,
+				m31, m32, m33, m34,
+				m41, m42, m43, m44;
+		};
+		float matrix[16];
+	};
 	Bone * parent = nullptr;
 	std::vector<Bone> children;
+	std::vector<Animation> Anims;
+	std::vector<unsigned int> vertIDs;
+	std::vector<float> boneWeight;
 };
+
 struct Mesh
 {
 	//array of vertexes
@@ -36,6 +68,8 @@ struct Mesh
 	Bone root;
 	//array of tri indexes
 	std::vector<unsigned int> indices;
-	std::vector<unsigned int> wireIndices;
+	//std::vector<unsigned int> wireIndices;
+
+	std::vector<Bone> bones;
 	//int* indices;
 };

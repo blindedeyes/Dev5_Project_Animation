@@ -28,21 +28,54 @@ struct vertex
 
 	}
 };
+
+
+struct AnimKey {
+	union {
+		struct {
+			float m11, m12, m13, m14,
+				m21, m22, m23, m24,
+				m31, m32, m33, m34,
+				m41, m42, m43, m44;
+		};
+		float data[16];
+	};
+	float KeyTime;
+};
+
+struct Animation {
+	std::vector<AnimKey> keys;
+};
+
 struct Bone
 {
 	vertex v;
+	union {
+		struct {
+			float m11, m12, m13, m14,
+				m21, m22, m23, m24,
+				m31, m32, m33, m34,
+				m41, m42, m43, m44;
+		};
+		float matrix[16];
+	};
 	Bone * parent = nullptr;
 	std::vector<Bone> children;
+	std::vector<Animation> Anims;
+	std::vector<unsigned int> vertIDs;
+	std::vector<float> boneWeight;
 };
+
 struct Mesh
 {
 	//array of vertexes
 	std::vector<vertex> verts;
-	//std::vector<vertex> bones;
 	Bone root;
 	//array of tri indexes
 	std::vector<unsigned int> indices;
-	std::vector<unsigned int> wireIndices;
+	//std::vector<unsigned int> wireIndices;
+
+	std::vector<Bone> bones;
 	//int* indices;
 };
 
@@ -51,6 +84,8 @@ struct RenderObject
 	DirectX::XMFLOAT4X4 worldMat;
 
 	int instanceCnt = 1;
+	int animID=0;
+	int animKeyID = 0;
 	Mesh mesh;
 
 	ID3D11Buffer * vertexBuffer = nullptr;
@@ -178,7 +213,9 @@ struct DebugObjects
 		lineVerts[CurrentCount + 1] = end;
 		CurrentCount += 2;
 	}
-
+	void ResetLines() {
+		CurrentCount = 0;
+	}
 };
 
 struct cWorldData

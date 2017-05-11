@@ -60,18 +60,21 @@ void pipelineManager::InitShaders()
 
 }
 
-void pipelineManager::AppendDebugBones(Bone b, vertex parent)
+void pipelineManager::DebugDrawBones(Mesh &m) {
+	
+}
+void pipelineManager::AppendDebugBones(Bone b)//, vertex parent)
 {
-	parent.x += b.v.x;
+	/*parent.x += b.v.x;
 	parent.y += b.v.y;
-	parent.z += b.v.z;
+	parent.z += b.v.z;*/
 
 	for (unsigned int j = 0; j < b.children.size(); j++)
 	{
-		vertex end = b.children[j].v;
+		/*vertex end = b.children[j].v;
 		end.x += parent.x;
 		end.y += parent.y;
-		end.z += parent.z;
+		end.z += parent.z;*/
 		/*
 		if (b.parent)
 		{
@@ -85,8 +88,8 @@ void pipelineManager::AppendDebugBones(Bone b, vertex parent)
 		}
 		*/
 
-		debugObjects.AddLine(parent, end);
-		AppendDebugBones(b.children[j], parent);
+		debugObjects.AddLine(b.v, b.children[j].v);
+		AppendDebugBones(b.children[j]); //, parent);
 	}
 }
 void pipelineManager::CreateTriangle()
@@ -136,7 +139,7 @@ void pipelineManager::CreateTriangle()
 		}
 		else
 		{
-			AppendDebugBones(meshes[i].root, vertex(0, 0, 0, 0, 1, 1, 1, 1));
+			AppendDebugBones(meshes[i].root);//, vertex(0, 0, 0, 0, 1, 1, 1, 1));
 		}
 	}
 	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i)
@@ -410,6 +413,17 @@ void pipelineManager::Update(float deltaTime)
 
 		if (GetAsyncKeyState(VK_SHIFT) & 0x01)
 			wireframeMode = !wireframeMode;
+		if (GetAsyncKeyState(VK_RIGHT) & 0x01) {
+			//advance current animation
+			if (default_pipeline.rendObjects.size()) {
+				
+				RenderObject* ro = &default_pipeline.rendObjects[0];
+				ro->animKeyID++;
+				debugObjects.ResetLines();
+				//ro->mesh.root
+				
+			}
+		}
 	}
 	
 
