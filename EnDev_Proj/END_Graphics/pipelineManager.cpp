@@ -60,8 +60,29 @@ void pipelineManager::InitShaders()
 
 }
 
-void pipelineManager::DebugDrawBones(Mesh &m) {
-	
+void pipelineManager::DrawDebugAnimationBone(unsigned int ani, unsigned int key, Bone b, vertex parent) {
+	DirectX::XMFLOAT4X4 mat = DirectX::XMFLOAT4X4(b.Anims[ani].keys[key].data);
+	DirectX::XMMATRIX matrix = DirectX::XMLoadFloat4x4(&mat);
+	DirectX::XMVECTOR vec = DirectX::XMLoadFloat4(&DirectX::XMFLOAT4(0, 0, 0, 1));
+	vec = DirectX::XMVector4Transform(vec, matrix);
+	DirectX::XMFLOAT4 pos;
+	DirectX::XMStoreFloat4(&pos, vec);
+	vertex v(vec.m128_f32[0], vec.m128_f32[1], vec.m128_f32[2], vec.m128_f32[3], 1, 1, 1, 1);
+	debugObjects.AddLine(parent, v);
+
+	for (unsigned int i = 0; i < b.children.size(); i++)
+		DrawDebugAnimationBone(ani, key, b.children[i], v);
+}
+void pipelineManager::DebugDrawBones(unsigned int ani, unsigned int key, Mesh &m) {
+	debugObjects.ResetLines();
+	Bone* root = &m.root;
+	DirectX::XMFLOAT4X4 mat = DirectX::XMFLOAT4X4(root->Anims[ani].keys[key].data);
+	DirectX::XMMATRIX matrix = DirectX::XMLoadFloat4x4(&mat);
+	DirectX::XMVECTOR vec = DirectX::XMLoadFloat4(&DirectX::XMFLOAT4(0, 0, 0, 1));
+	vec = DirectX::XMVector4Transform(vec, matrix);
+	DirectX::XMFLOAT4 pos;
+	DirectX::XMStoreFloat4(&pos, vec);
+
 }
 void pipelineManager::AppendDebugBones(Bone b)//, vertex parent)
 {
@@ -127,18 +148,18 @@ void pipelineManager::CreateTriangle()
 
 	//std::vector<Mesh> meshes = obj.LoadFBXFile("battleMage.fbx");
 	std::vector<Mesh> meshes = obj.LoadFBXFile("Teddy_Run.fbx");
-	
+
 	//meshes[0]
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
-		if (meshes[i].verts.size() > 0)
+		//if (meshes[i].verts.size() > 0)
 		{
 			RenderObject ro;
 			ro.mesh = meshes[i];
 			default_pipeline.rendObjects.push_back(ro);
-		}
+		/*}
 		else
-		{
+		{*/
 			AppendDebugBones(meshes[i].root);//, vertex(0, 0, 0, 0, 1, 1, 1, 1));
 		}
 	}
@@ -245,9 +266,9 @@ void pipelineManager::CreatePlane()
 	ro.mesh.indices.push_back(0);
 
 	default_pipeline.rendObjects.push_back(ro);
-	default_pipeline.rendObjects[default_pipeline.rendObjects.size()-1].createBuffer(device);
-	default_pipeline.rendObjects[default_pipeline.rendObjects.size()-1].createIndex(device);
-	
+	default_pipeline.rendObjects[default_pipeline.rendObjects.size() - 1].createBuffer(device);
+	default_pipeline.rendObjects[default_pipeline.rendObjects.size() - 1].createIndex(device);
+
 	CD3D11_BUFFER_DESC constantBufferDesc(sizeof(cWorldData), D3D11_BIND_CONSTANT_BUFFER);
 
 
@@ -416,16 +437,55 @@ void pipelineManager::Update(float deltaTime)
 		if (GetAsyncKeyState(VK_RIGHT) & 0x01) {
 			//advance current animation
 			if (default_pipeline.rendObjects.size()) {
-				
+
 				RenderObject* ro = &default_pipeline.rendObjects[0];
-				ro->animKeyID++;
-				debugObjects.ResetLines();
-				//ro->mesh.root
-				
+				if (ro->mesh.root.Anims.size()) {
+					ro->animKeyID = (ro->animKeyID + 1);// % ro->mesh.root.Anims[ro->animID].keys.size();
+
+					if (ro->animKeyID >= ro->mesh.root.Anims[ro->animID].keys.size())
+						ro->animKeyID = 1;
+
+					debugObjects.ResetLines();
+					//ro->mesh.root
+					DirectX::XMFLOAT4X4 mat = DirectX::XMFLOAT4X4(ro->mesh.root.Anims[ro->animID].keys[ro->animKeyID].data);
+					DirectX::XMMATRIX matrix = DirectX::XMLoadFloat4x4(&mat);
+					DirectX::XMVECTOR vec = DirectX::XMLoadFloat4(&DirectX::XMFLOAT4(0, 0, 0, 1));
+					vec = DirectX::XMVector4Transform(vec, matrix);
+					DirectX::XMFLOAT4 pos;
+					DirectX::XMStoreFloat4(&pos, vec);
+					vertex v(vec.m128_f32[0], vec.m128_f32[1], vec.m128_f32[2], vec.m128_f32[3], 1, 1, 1, 1);
+					for (unsigned int i = 0; i < ro->mesh.root.children.size(); i++)
+						DrawDebugAnimationBone(ro->animID, ro->animKeyID, ro->mesh.root.children[i], v);
+
+				}
+			}
+		}
+		else if (GetAsyncKeyState(VK_LEFT) & 0x01) {
+			//advance current animation
+			if (default_pipeline.rendObjects.size()) {
+
+				RenderObject* ro = &default_pipeline.rendObjects[0];
+				if (ro->mesh.root.Anims.size()) {
+					ro->animKeyID = (ro->animKeyID - 1);// % ro->mesh.root.Anims[ro->animID].keys.size();
+					if (ro->animKeyID <= 0) 
+						ro->animKeyID = ro->mesh.root.Anims[ro->animID].keys.size() - 1;
+					debugObjects.ResetLines();
+					//ro->mesh.root
+					DirectX::XMFLOAT4X4 mat = DirectX::XMFLOAT4X4(ro->mesh.root.Anims[ro->animID].keys[ro->animKeyID].data);
+					DirectX::XMMATRIX matrix = DirectX::XMLoadFloat4x4(&mat);
+					DirectX::XMVECTOR vec = DirectX::XMLoadFloat4(&DirectX::XMFLOAT4(0, 0, 0, 1));
+					vec = DirectX::XMVector4Transform(vec, matrix);
+					DirectX::XMFLOAT4 pos;
+					DirectX::XMStoreFloat4(&pos, vec);
+					vertex v(vec.m128_f32[0], vec.m128_f32[1], vec.m128_f32[2], vec.m128_f32[3], 1, 1, 1, 1);
+					for (unsigned int i = 0; i < ro->mesh.root.children.size(); i++)
+						DrawDebugAnimationBone(ro->animID, ro->animKeyID, ro->mesh.root.children[i], v);
+
+				}
 			}
 		}
 	}
-	
+
 
 }
 
@@ -565,9 +625,9 @@ void pipelineManager::DrawPipeLine(const pipelineState &state)
 	UINT stride = sizeof(vertex);
 	UINT offset = 0;
 
-	if (wireframeMode) 
+	if (wireframeMode)
 		devContext->RSSetState(state.debugRasterState.p);
-	else 
+	else
 		devContext->RSSetState(state.rasterState.p);
 
 	DirectX::XMStoreFloat4x4(&bufferData.world[0], DirectX::XMMatrixIdentity());

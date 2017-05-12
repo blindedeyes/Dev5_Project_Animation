@@ -1,21 +1,16 @@
-﻿  stdafx.cpp
-  clsFBXWrap.cpp
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(72): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(73): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(88): warning C4018: '<': signed/unsigned mismatch
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(102): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(250): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(287): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(291): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(292): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(293): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(356): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(360): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(361): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(362): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
-  FBX_CONV.cpp
-  Generating Code...
-  dllmain.cpp
-     Creating library C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\FBX_CONV.lib and object C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\FBX_CONV.exp
-  FBX_CONV.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\FBX_CONV.dll
-  FBX_CONV.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\FBX_CONV.pdb (Full PDB)
+﻿  clsFBXWrap.cpp
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(73): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(74): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(89): warning C4018: '<': signed/unsigned mismatch
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(103): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(251): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(288): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(292): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(293): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(294): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(359): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(363): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(364): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+c:\users\desky-chan\documents\visual studio 2015\projects\rtaproject\dev5_project_animation\endev_proj\fbx_conv\clsfbxwrap.cpp(365): warning C4244: '=': conversion from 'fbxsdk::FbxDouble' to 'float', possible loss of data
+  FBX_CONV.vcxproj -> C:\Users\Desky-chan\Documents\Visual Studio 2015\Projects\RTAProject\Dev5_Project_Animation\EnDev_Proj\Debug\FBX_CONV.dll
+  FBX_CONV.vcxproj -> C:\Users\Desky-chan\Documents\Visual Studio 2015\Projects\RTAProject\Dev5_Project_Animation\EnDev_Proj\Debug\FBX_CONV.pdb (Full PDB)

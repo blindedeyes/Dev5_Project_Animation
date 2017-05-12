@@ -42,7 +42,9 @@ class pipelineManager
 	void CreatePlane();
 	void UpdateCamera(float delta_time);
 	void AppendDebugBones(Bone b);// , vertex parent);
-	void DebugDrawBones(Mesh &m);
+	void DebugDrawBones(unsigned int ani, unsigned int key, Mesh &m);
+	void DrawDebugAnimationBone(unsigned int ani, unsigned int key, Bone b, vertex parent);
+
 
 public:
 

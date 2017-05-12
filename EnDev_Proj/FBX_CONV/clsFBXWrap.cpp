@@ -18,6 +18,7 @@ namespace bFBX_CONVERT
 	* Print the required number of tabs.
 	*/
 	int numTabs = 0;
+	FbxScene* lScene;
 	void PrintTabs()
 	{
 		for (int i = 0; i < numTabs; i++)
@@ -202,13 +203,13 @@ namespace bFBX_CONVERT
 	void GetNodeKeyFrameData(FbxNode* node, Bone& b) {
 		// Iterate all animations (for example, walking, running, falling and etc.)
 		FbxCriteria crit = FbxCriteria::ObjectTypeStrict(FbxAnimStack::ClassId);
-		int numAnimations = node->GetSrcObjectCount(crit);
+		int numAnimations = lScene->GetSrcObjectCount(crit);
 		for (int animationIndex = 0; animationIndex < numAnimations; animationIndex++)
 		{
 			Animation ani;
 
-			FbxAnimStack *animStack = (FbxAnimStack*)node->GetSrcObject(crit, animationIndex);
-			FbxAnimEvaluator *animEvaluator = node->GetAnimationEvaluator();
+			FbxAnimStack *animStack = (FbxAnimStack*)lScene->GetSrcObject(crit, animationIndex);
+			FbxAnimEvaluator *animEvaluator = lScene->GetAnimationEvaluator();
 			animStack->GetName(); // Get the name of the animation if needed
 
 								  // Iterate all the transformation layers of the animation. You can have several layers, for example one for translation, one for rotation, one for scaling and each can have keys at different frame numbers.
@@ -310,6 +311,7 @@ namespace bFBX_CONVERT
 		std::vector<Mesh> res;
 		const int numChilds = root->GetChildCount();
 		FbxNode* child = nullptr;
+		Mesh m;
 
 		for (int i = 0; i < numChilds; ++i)
 		{
@@ -325,13 +327,14 @@ namespace bFBX_CONVERT
 				printf(child->GetName());
 				printf("\n");
 				//Make one of my mesh objects to store the data
-				Mesh m = LoadMesh(thisMesh);
-				res.push_back(m);
+				Mesh mt = LoadMesh(thisMesh);
+				m.verts = mt.verts;
+				m.indices = mt.indices;
+				//res.push_back(m);
 			}
 			else //IF node isn't a mesh
 			{
 				int attribs = child->GetNodeAttributeCount();
-				Mesh m;
 				for (int attrI = 0; attrI < attribs; ++attrI)
 				{
 					FbxNodeAttribute * attrb = child->GetNodeAttributeByIndex(attrI);
@@ -365,9 +368,11 @@ namespace bFBX_CONVERT
 						break;
 					}
 				}
-				res.push_back(m);
 			}
 		}
+		//HACK
+		res.push_back(m);
+
 		return res;
 	}
 
@@ -396,7 +401,7 @@ namespace bFBX_CONVERT
 		}
 
 		// Create a new scene so that it can be populated by the imported file.
-		FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
+		lScene = FbxScene::Create(lSdkManager, "myScene");
 
 		// Import the contents of the file into the scene.
 		lImporter->Import(lScene);
