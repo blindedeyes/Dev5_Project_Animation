@@ -28,7 +28,8 @@ class pipelineManager
 	bool wireframeMode = false;
 	DebugObjects debugObjects;
 	
-
+	int animatorState=0;
+	float aniTimer = 0;
 	POINT mPrevPoint;
 	//Init
 	void InitDepthBuffer(ID3D11Texture2D ** text, int width, int height);
@@ -41,9 +42,11 @@ class pipelineManager
 	void CreateTriangle();
 	void CreatePlane();
 	void UpdateCamera(float delta_time);
+	void UpdateAnimation(float delta_time);
 	void AppendDebugBones(Bone b);// , vertex parent);
 	void DebugDrawBones(unsigned int ani, unsigned int key, Mesh &m);
 	void DrawDebugAnimationBone(unsigned int ani, unsigned int key, Bone b, vertex parent);
+	void DrawDebugAnimationBoneTime(unsigned int ani, unsigned int key, Bone b, vertex parent);
 
 
 public:

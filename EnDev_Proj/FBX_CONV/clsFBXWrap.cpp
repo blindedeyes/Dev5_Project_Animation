@@ -243,7 +243,7 @@ namespace bFBX_CONVERT
 
 						//Keyframe matrix at this time.
 						mat = node->EvaluateGlobalTransform(frameTime);
-
+						key.KeyTime = frameTime.GetMilliSeconds()*1e-3;
 						for (USHORT i = 0; i < 4; ++i)
 							for (USHORT j = 0; j < 4; ++j)
 							{
@@ -426,11 +426,13 @@ namespace bFBX_CONVERT
 		FbxNode* lRootNode = lScene->GetRootNode();
 
 		std::vector<Mesh> msh = LoadRoot(lRootNode);
+#ifdef _DEBUG
 		if (lRootNode)
 		{
 			for (int i = 0; i < lRootNode->GetChildCount(); i++)
 				PrintNode(lRootNode->GetChild(i));
 		}
+#endif
 		// Destroy the SDK manager and all the other objects it was handling.
 		lSdkManager->Destroy();
 		return msh;
