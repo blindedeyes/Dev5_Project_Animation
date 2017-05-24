@@ -169,7 +169,7 @@ void pipelineManager::CreateTriangle()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	//setup shaders
+	//setup shaders	
 	device->CreateVertexShader(&Trivial_VS, sizeof(Trivial_VS), NULL, &default_pipeline.vertex_shader);
 	device->CreatePixelShader(&Trivial_PS, sizeof(Trivial_PS), NULL, &default_pipeline.pixel_shader);
 	//setup input layout
@@ -180,9 +180,9 @@ void pipelineManager::CreateTriangle()
 	char c = obj.test();
 	std::cout << (c);
 
-	std::vector<Mesh> meshes = obj.LoadFBXFile("Run.fbx");
+	//std::vector<Mesh> meshes = obj.LoadFBXFile("Run.fbx");
 	//std::vector<Mesh> meshes = obj.LoadFBXFile("battleMage.fbx");
-	//std::vector<Mesh> meshes = obj.LoadFBXFile("Teddy_Run.fbx");
+	std::vector<Mesh> meshes = obj.LoadFBXFile("Teddy_Run.fbx");
 
 	//meshes[0]
 	for (unsigned int i = 0; i < meshes.size(); ++i)
@@ -663,6 +663,9 @@ void pipelineManager::UpdateAnimation(float delta_time)
 	}
 	else if (GetAsyncKeyState('2') & 0x01) {
 		animatorState = 1;
+		RenderObject* ro = &default_pipeline.rendObjects[0];
+		ro->animKeyID = 0;
+		aniTimer = 0;
 	}
 
 }
