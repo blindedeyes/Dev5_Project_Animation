@@ -1,1 +1,9 @@
-﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(1235,5): error MSB6006: "fxc.exe" exited with code -1073741510.
+﻿  pipelineManager.cpp
+f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(402): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(403): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(552): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(553): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(589): warning C4018: '>=': signed/unsigned mismatch
+f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(643): warning C4018: '>=': signed/unsigned mismatch
+  END_Graphics.vcxproj -> F:\2017Projects\VisualStudioProj\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.exe
+  END_Graphics.vcxproj -> F:\2017Projects\VisualStudioProj\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)

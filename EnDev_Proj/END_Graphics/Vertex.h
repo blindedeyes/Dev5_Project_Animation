@@ -68,18 +68,15 @@ struct Bone
 	std::vector<Animation> Anims;
 };
 
-struct shaderAni {
-	DirectX::XMMATRIX keyframe[50];
-};
-struct shaderBone {
-	shaderAni anim[15];
+struct shaderKeys {
+	//first one is inv bind pos
+	//second is prev frame, third is curr frame
+	DirectX::XMMATRIX keyframe[3];
 };
 struct cShaderBones
 {
-	unsigned int aniID;
-	unsigned int KeyFrame;
 	float ratio;
-	shaderBone bones[50];
+	shaderKeys bones[35];
 };
 
 struct Mesh
@@ -101,7 +98,7 @@ struct RenderObject
 
 	int instanceCnt = 1;
 	int animID = 0;
-	int animKeyID = 0;
+	int animKeyID = 1;
 	Mesh mesh;
 
 	ID3D11Buffer * vertexBuffer = nullptr;
@@ -120,7 +117,7 @@ struct RenderObject
 				//only if we have a key
 				if (mesh.bones[i].Anims[ani].keys.size()) {
 					DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(mesh.bones[i].Anims[ani].keys[0].data));
-					mat = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, mat));
+					mat = (DirectX::XMMatrixInverse(nullptr, mat));
 					DirectX::XMFLOAT4X4 temp;
 					DirectX::XMStoreFloat4x4(&temp, mat);
 					float* data = mesh.bones[i].Anims[ani].keys[0].data;
@@ -141,34 +138,6 @@ struct RenderObject
 					data[13] = temp._42;
 					data[14] = temp._43;
 					data[16] = temp._44;
-
-					using namespace DirectX;
-					for (unsigned int key = 1; mesh.bones[i].Anims[ani].keys.size(); ++key) {
-						temp = XMFLOAT4X4(mesh.bones[i].Anims[ani].keys[key].data);
-
-						mat = DirectX::XMLoadFloat4x4(&temp);
-						mat = DirectX::XMMatrixTranspose((nullptr, mat));
-						
-						DirectX::XMStoreFloat4x4(&temp, mat);
-						float* data = mesh.bones[i].Anims[ani].keys[key].data;
-						//f*@#! hard code
-						data[0] = temp._11;
-						data[1] = temp._12;
-						data[2] = temp._13;
-						data[3] = temp._14;
-						data[4] = temp._21;
-						data[5] = temp._22;
-						data[6] = temp._23;
-						data[7] = temp._24;
-						data[8] = temp._31;
-						data[9] = temp._32;
-						data[10] = temp._33;
-						data[11] = temp._34;
-						data[12] = temp._41;
-						data[13] = temp._42;
-						data[14] = temp._43;
-						data[16] = temp._44;
-					}
 				}
 			}
 		}
@@ -195,16 +164,8 @@ struct RenderObject
 			CD3D11_BUFFER_DESC constantBufferDesc(sizeof(cShaderBones), D3D11_BIND_CONSTANT_BUFFER);
 			device->CreateBuffer(&constantBufferDesc, NULL, &cbBoneBuffer.p);
 			bufferBoneData = new cShaderBones();
-			bufferBoneData->aniID = 0;
-			bufferBoneData->KeyFrame = 0;
 			bufferBoneData->ratio = 0;
-			for (unsigned int i = 0; i < mesh.bones.size(); ++i) {
-				for (unsigned int ani = 0; ani < mesh.bones[i].Anims.size(); ++ani) {
-					for (unsigned int key = 0; key < mesh.bones[i].Anims[ani].keys.size(); ++key) {
-						bufferBoneData->bones[i].anim[ani].keyframe[key] = DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(mesh.bones[i].Anims[ani].keys[key].data));
-					}
-				}
-			}
+			
 		}
 		////D3D11_BUFFER_DESC desc;
 
@@ -266,16 +227,20 @@ struct RenderObject
 		indexBuffer->Release();
 		delete bufferBoneData;
 	}
-	float getKeyFrameTotal() {
+	float getKeyFrameTotal(float aniTimer) {
 		unsigned int prevFrame = animKeyID - 1;
-		if (prevFrame == 0)
+		if (prevFrame == 0 || prevFrame > mesh.bones[0].Anims[animID].keys.size() - 1)
 			prevFrame = mesh.bones[0].Anims[animID].keys.size() - 1;
+
 		if (prevFrame < animKeyID) {
-			return (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime - mesh.bones[0].Anims[animID].keys[prevFrame].KeyTime);
+			return (aniTimer - mesh.bones[0].Anims[animID].keys[prevFrame].KeyTime)
+				/ (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime - mesh.bones[0].Anims[animID].keys[prevFrame].KeyTime);
 		}
 		else {
-			return (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime);
+			return aniTimer
+				/ (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime);
 		}
+		
 	}
 };
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "SkinningAniShader.csh"
-#include "Trivial_VS.csh"
+//#include "Trivial_VS.csh"
 #include "Trivial_PS.csh"
 
 
@@ -207,7 +207,7 @@ void pipelineManager::CreateTriangle()
 		device->CreateVertexShader(&SkinningAniShader, sizeof(SkinningAniShader), NULL, &default_pipeline.vertex_shader);
 		device->CreatePixelShader(&Trivial_PS, sizeof(Trivial_PS), NULL, &default_pipeline.pixel_shader);
 		//setup input layout
-		device->CreateInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), Trivial_VS, sizeof(Trivial_VS), &default_pipeline.input_layout.p);
+		device->CreateInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), SkinningAniShader, sizeof(SkinningAniShader), &default_pipeline.input_layout.p);
 	}
 
 
@@ -215,8 +215,10 @@ void pipelineManager::CreateTriangle()
 	char c = obj.test();
 	std::cout << (c);
 
-	//std::vector<Mesh> meshes = obj.LoadFBXFile("Run.fbx");
-	//std::vector<Mesh> meshes = obj.LoadFBXFile("battleMage.fbx");
+	//std::vector<Mesh> meshes = 
+	//obj.LoadFBXFile("Run.fbx");
+	//std::vector<Mesh> meshes = 
+	//obj.LoadFBXFile("battleMage.fbx");
 	obj.LoadFBXFile("Teddy_Run.fbx");
 	std::vector<Mesh> meshes = obj.getResult();
 	//RenderObject ro;
@@ -401,8 +403,8 @@ void pipelineManager::InitPipeline(HWND hWnd)
 		vPort.Height = height;
 		vPort.MinDepth = 0;
 		vPort.MaxDepth = 1;
-	
-	
+
+
 		float aspectRatio = (float)width / height;
 		float fovAngleY = 70.0f * DirectX::XM_PI / 180.0f;
 
@@ -489,15 +491,15 @@ void pipelineManager::Update(float deltaTime)
 		if (GetAsyncKeyState(VK_SHIFT) & 0x01)
 			wireframeMode = !wireframeMode;
 
-		UpdateAnimation(deltaTime);
 	}
+	UpdateAnimation(deltaTime);
 
 
 }
 
 void pipelineManager::UpdateCamera(float delta_time)
 {
-	const float moveSpd = 10.0f;
+	const float moveSpd = 100.0f;
 
 	if (GetAsyncKeyState('W'))
 	{
@@ -546,7 +548,7 @@ void pipelineManager::UpdateCamera(float delta_time)
 	GetCursorPos(&curPoint);
 	if (GetAsyncKeyState(VK_RBUTTON))
 	{
-		float rotSpd = 20.0f;
+		float rotSpd = 5.0f;
 		float dx = curPoint.x - mPrevPoint.x;
 		float dy = curPoint.y - mPrevPoint.y;
 
@@ -574,7 +576,8 @@ void pipelineManager::UpdateCamera(float delta_time)
 
 void pipelineManager::UpdateAnimation(float delta_time)
 {
-	if (animatorState == 0) {
+	delta_time *= .8f;
+	if (animatorState == 0 && (GetActiveWindow() == mhWnd)) {
 		if (GetAsyncKeyState(VK_RIGHT) & 0x01) {
 			//advance current animation
 			if (default_pipeline.rendObjects.size()) {
@@ -677,14 +680,16 @@ void pipelineManager::UpdateAnimation(float delta_time)
 			DrawDebugAnimationBoneTime(ro->animID, ro->animKeyID, ro->mesh.root.children[i], v);
 
 	}
-	if (GetAsyncKeyState('1') & 0x01) {
-		animatorState = 0;
-	}
-	else if (GetAsyncKeyState('2') & 0x01) {
-		animatorState = 1;
-		RenderObject* ro = &default_pipeline.rendObjects[0];
-		ro->animKeyID = 0;
-		aniTimer = 0;
+	if (GetActiveWindow() == mhWnd) {
+		if (GetAsyncKeyState('1') & 0x01) {
+			animatorState = 0;
+		}
+		else if (GetAsyncKeyState('2') & 0x01) {
+			animatorState = 1;
+			RenderObject* ro = &default_pipeline.rendObjects[0];
+			ro->animKeyID = 1;
+			aniTimer = 0;
+		}
 	}
 
 }
@@ -774,10 +779,22 @@ void pipelineManager::DrawPipeLine(pipelineState &state)
 		devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 		//devContext->IASetIndexBuffer(state.rendObjects[i].wireIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 		if (state.rendObjects[i].bufferBoneData) {
-			state.rendObjects[i].bufferBoneData->ratio = aniTimer / state.rendObjects[i].getKeyFrameTotal();
-			state.rendObjects[i].bufferBoneData->aniID = state.rendObjects[i].animID;
-			state.rendObjects[i].bufferBoneData->KeyFrame = state.rendObjects[i].animKeyID;
-
+			state.rendObjects[i].bufferBoneData->ratio = state.rendObjects[i].getKeyFrameTotal(aniTimer);
+			for (unsigned int b = 0; b < state.rendObjects[i].mesh.bones.size(); ++b) {
+				state.rendObjects[i].bufferBoneData->bones[b].keyframe[0] =
+					DirectX::XMMatrixTranspose(
+						DirectX::XMLoadFloat4x4(
+							&DirectX::XMFLOAT4X4(
+								state.rendObjects[i].mesh.bones[b].Anims[state.rendObjects[i].animID].keys[0].data
+							)
+						)
+					);
+				int prev = state.rendObjects[i].animKeyID - 1;
+				if (prev < 1)
+					prev = state.rendObjects[i].mesh.bones[b].Anims[state.rendObjects[i].animID].keys.size() - 1;
+				state.rendObjects[i].bufferBoneData->bones[b].keyframe[1] = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(state.rendObjects[i].mesh.bones[b].Anims[state.rendObjects[i].animID].keys[prev].data)));
+				state.rendObjects[i].bufferBoneData->bones[b].keyframe[2] = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(state.rendObjects[i].mesh.bones[b].Anims[state.rendObjects[i].animID].keys[state.rendObjects[i].animKeyID].data)));
+			}
 			devContext->UpdateSubresource(state.rendObjects[i].cbBoneBuffer.p, 0, NULL, state.rendObjects[i].bufferBoneData, 0, 0);
 			devContext->VSSetConstantBuffers(1, 1, &state.rendObjects[i].cbBoneBuffer.p);
 		}
@@ -844,7 +861,7 @@ pipelineManager::~pipelineManager()
 	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i) {
 
 		default_pipeline.rendObjects[i].Cleanup();
-//		default_pipeline.rendObjects[i].vertexBuffer->Release();
+		//		default_pipeline.rendObjects[i].vertexBuffer->Release();
 
 	}
 	debugObjects.vertexBuffer->Release();
