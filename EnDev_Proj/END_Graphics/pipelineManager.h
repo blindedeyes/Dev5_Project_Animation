@@ -48,7 +48,7 @@ class pipelineManager
 	void DrawDebugAnimationBone(unsigned int ani, unsigned int key, Bone b, vertex parent);
 	void DrawDebugAnimationBoneTime(unsigned int ani, unsigned int key, Bone b, vertex parent);
 
-
+	void AddMeshes(std::vector<Mesh>&meshes);
 public:
 
 
@@ -62,7 +62,7 @@ public:
 	void ClearBuffers();
 	void Drawstate();
 	void Swap();
-	void DrawPipeLine(const pipelineState &state);
+	void DrawPipeLine(pipelineState &state);
 	void DrawDebugObjecs();
 
 

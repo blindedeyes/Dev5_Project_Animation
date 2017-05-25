@@ -1,4 +1,1 @@
-﻿  END_Graphics.cpp
-c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\end_graphics.cpp(111): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.exe
-  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(1235,5): error MSB6006: "fxc.exe" exited with code -1073741510.

@@ -13,12 +13,15 @@ namespace bFBX_CONVERT
 	{
 	}
 
-
+	void GetNodeKeyFrameData(FbxNode* node, Bone& b);
 	/**
 	* Print the required number of tabs.
 	*/
 	int numTabs = 0;
 	FbxScene* lScene;
+
+	std::vector<Mesh> res;
+
 	void PrintTabs()
 	{
 		for (int i = 0; i < numTabs; i++)
@@ -51,32 +54,6 @@ namespace bFBX_CONVERT
 		//printf("%d", sizeof(m.indices));
 		//==============================================somany============
 
-		//get vert uv data
-		FbxStringList uvsetlist;
-		thisMesh->GetUVSetNames(uvsetlist);
-		for (int p = 0; p < polyCnt; ++p)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				FbxVector2 uv;
-				bool unmapped;
-				FbxVector4 normal;
-				thisMesh->GetPolygonVertexUV(p, i, uvsetlist.GetStringAt(0), uv, unmapped);
-				int indx = thisMesh->GetPolygonVertex(p, i);
-				thisMesh->GetPolygonVertexNormal(p, i, normal);
-				m.indices.push_back(m.verts.size());
-				vertex vert;
-				vert.x = temporaryVerts[indx].x;
-				vert.y = temporaryVerts[indx].y;
-				vert.z = temporaryVerts[indx].z;
-				vert.w = 1;
-				vert.r = uv[0];
-				vert.g = uv[1];
-				vert.b = 0;
-				vert.a = 1;
-				m.verts.push_back(vert);
-			}
-		}
 
 		//number of bones
 		unsigned int deformerCnt = thisMesh->GetDeformerCount();
@@ -107,16 +84,60 @@ namespace bFBX_CONVERT
 				int* boneVertIndx = cluster->GetControlPointIndices();
 				double* boneVertWeight = cluster->GetControlPointWeights();
 
+				//This needs to be what verts are effected by what bones
 				//Let bones know who they affect
 				unsigned int clusterVertCnt = cluster->GetControlPointIndicesCount();
 				for (unsigned int vIndex = 0; vIndex < clusterVertCnt; ++vIndex) {
-					thisB.vertIDs.push_back(boneVertIndx[vIndex]);
-					thisB.boneWeight.push_back((float)boneVertWeight[vIndex]);
+					//thisB.vertIDs.push_back(boneVertIndx[vIndex]);
+					//thisB.boneWeight.push_back((float)boneVertWeight[vIndex]);
+
+					//what bone is this for the vert, assign it the next bone to be added.
+					if (temporaryVerts[boneVertIndx[vIndex]].bneCnt < 4) {
+						temporaryVerts[boneVertIndx[vIndex]].boneID[temporaryVerts[boneVertIndx[vIndex]].bneCnt] = m.bones.size();
+						temporaryVerts[boneVertIndx[vIndex]].boneWeight[temporaryVerts[boneVertIndx[vIndex]].bneCnt] = boneVertWeight[vIndex];
+						temporaryVerts[boneVertIndx[vIndex]].bneCnt++;
+					}
 				}
+				GetNodeKeyFrameData(bone, thisB);
 				m.bones.push_back(thisB);
 			}
 
 		}
+
+
+		//get vert uv data
+		FbxStringList uvsetlist;
+		thisMesh->GetUVSetNames(uvsetlist);
+		for (int p = 0; p < polyCnt; ++p)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				FbxVector2 uv;
+				bool unmapped;
+				FbxVector4 normal;
+				thisMesh->GetPolygonVertexUV(p, i, uvsetlist.GetStringAt(0), uv, unmapped);
+				int indx = thisMesh->GetPolygonVertex(p, i);
+				thisMesh->GetPolygonVertexNormal(p, i, normal);
+				m.indices.push_back(m.verts.size());
+				vertex vert;
+				vert.x = temporaryVerts[indx].x;
+				vert.y = temporaryVerts[indx].y;
+				vert.z = temporaryVerts[indx].z;
+				vert.w = 1;
+				vert.r = uv[0];
+				vert.g = uv[1];
+				vert.b = 0;
+				vert.a = 1;
+				vert.bneCnt = temporaryVerts[indx].bneCnt;
+				for (unsigned int j = 0; j < 4; ++j) {
+					vert.boneID[j] = temporaryVerts[indx].boneID[j];
+					vert.boneWeight[j] = temporaryVerts[indx].boneWeight[j];
+
+				}
+				m.verts.push_back(vert);
+			}
+		}
+
 
 		//m.verts.push_back(myVert);
 		return m;
@@ -220,7 +241,7 @@ namespace bFBX_CONVERT
 				FbxAnimLayer *animLayer = (FbxAnimLayer*)animStack->GetMember(layerIndex);
 				//animLayer->GetName(); // Get the layer's name if needed
 				//animStack->getm
-				
+
 				//only using this to get key timings, because idk wtf else to use
 				FbxAnimCurve *translationCurve = node->LclTranslation.GetCurve(animLayer);
 				//FbxAnimCurve *rotationCurve = node->LclRotation.GetCurve(animLayer);
@@ -247,7 +268,6 @@ namespace bFBX_CONVERT
 						for (USHORT i = 0; i < 4; ++i)
 							for (USHORT j = 0; j < 4; ++j)
 							{
-
 								key.data[i + j * 4] = mat.Get(j, i);
 
 							}
@@ -257,9 +277,9 @@ namespace bFBX_CONVERT
 
 					}
 				}
-				
 
-					// Analogically, process rotationa and translation 
+
+				// Analogically, process rotationa and translation 
 
 			}
 			b.Anims.push_back(ani);
@@ -272,6 +292,7 @@ namespace bFBX_CONVERT
 		unsigned int childrenCnt = node->GetChildCount();
 		for (unsigned int i = 0; i < childrenCnt; i++)
 		{
+
 			FbxNode *child = node->GetChild(i);
 			Bone nb;
 			/*FbxDouble3 trans = child->LclTranslation.Get();
@@ -280,7 +301,6 @@ namespace bFBX_CONVERT
 			nb.v.z = trans[2];*/
 
 			auto mat = child->EvaluateGlobalTransform(0);
-
 			for (USHORT i = 0; i < 4; ++i)
 				for (USHORT j = 0; j < 4; ++j)
 				{
@@ -305,10 +325,10 @@ namespace bFBX_CONVERT
 			b.children.push_back(nb);
 		}
 	}
+	//DLLHANDLER std::vector<Mesh> LoadRoot(FbxNode * root)
 
-	DLLHANDLER std::vector<Mesh> LoadRoot(FbxNode * root)
+	DLLHANDLER void LoadRoot(FbxNode * root)
 	{
-		std::vector<Mesh> res;
 		const int numChilds = root->GetChildCount();
 		FbxNode* child = nullptr;
 		Mesh m;
@@ -330,6 +350,7 @@ namespace bFBX_CONVERT
 				Mesh mt = LoadMesh(thisMesh);
 				m.verts = mt.verts;
 				m.indices = mt.indices;
+				m.bones = mt.bones;
 				//res.push_back(m);
 			}
 			else //IF node isn't a mesh
@@ -372,11 +393,13 @@ namespace bFBX_CONVERT
 		}
 		//HACK
 		res.push_back(m);
-
-		return res;
+		//msh = res;
+		//return res;
 	}
 
-	DLLHANDLER std::vector<Mesh> clsFBXWrapper::LoadFBXFile(const char * filename)
+	//DLLHANDLER std::vector<Mesh> clsFBXWrapper::LoadFBXFile(const char * filename)
+
+	DLLHANDLER void clsFBXWrapper::LoadFBXFile(const char * filename)
 	{
 
 		// Change the following filename to a suitable filename value.
@@ -416,7 +439,7 @@ namespace bFBX_CONVERT
 		if (conv.Triangulate(lScene, true) == false)
 		{
 			//if failed, return;
-			return std::vector<Mesh>();
+			return;
 		}
 		// Print the nodes of the scene and their attributes recursively.
 		// Note that we are not printing the root node because it should
@@ -424,8 +447,9 @@ namespace bFBX_CONVERT
 
 		//This node is how to tell where objects are.
 		FbxNode* lRootNode = lScene->GetRootNode();
-
-		std::vector<Mesh> msh = LoadRoot(lRootNode);
+		LoadRoot(lRootNode);
+		/*msh = res;
+		res.clear();*/
 #ifdef _DEBUG
 		if (lRootNode)
 		{
@@ -435,7 +459,10 @@ namespace bFBX_CONVERT
 #endif
 		// Destroy the SDK manager and all the other objects it was handling.
 		lSdkManager->Destroy();
-		return msh;
+		//return msh;
+	}
+	DLLHANDLER std::vector<Mesh> clsFBXWrapper::getResult() {
+		return res;
 	}
 
 }

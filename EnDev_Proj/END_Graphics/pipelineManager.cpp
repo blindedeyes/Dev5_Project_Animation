@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "SkinningAniShader.csh"
 #include "Trivial_VS.csh"
 #include "Trivial_PS.csh"
 
@@ -91,7 +92,6 @@ void pipelineManager::DrawDebugAnimationBoneTime(unsigned int ani, unsigned int 
 	if (prevFrame < key) {
 		t = (aniTimer - b.Anims[ani].keys[prevFrame].KeyTime)
 			/ (b.Anims[ani].keys[key].KeyTime - b.Anims[ani].keys[prevFrame].KeyTime);
-
 	}
 	else {
 		t = aniTimer
@@ -106,6 +106,28 @@ void pipelineManager::DrawDebugAnimationBoneTime(unsigned int ani, unsigned int 
 
 	for (unsigned int i = 0; i < b.children.size(); i++)
 		DrawDebugAnimationBoneTime(ani, key, b.children[i], v);
+}
+void pipelineManager::AddMeshes(std::vector<Mesh>& meshes)
+{
+	////meshes[0]
+	for (unsigned int i = 0; i < meshes.size(); ++i)
+	{
+		//if (meshes[i].verts.size() > 0)
+		{
+			RenderObject ro;
+			ro.mesh = meshes[i];
+			default_pipeline.rendObjects.push_back(ro);
+			/*}
+			else
+			{*/
+			AppendDebugBones(meshes[i].root);//, vertex(0, 0, 0, 0, 1, 1, 1, 1));
+		}
+	}
+	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i)
+	{
+		default_pipeline.rendObjects[i].createBuffer(device);
+		default_pipeline.rendObjects[i].createIndex(device);
+	}
 }
 void pipelineManager::DebugDrawBones(unsigned int ani, unsigned int key, Mesh &m) {
 	debugObjects.ResetLines();
@@ -150,30 +172,43 @@ void pipelineManager::AppendDebugBones(Bone b)//, vertex parent)
 void pipelineManager::CreateTriangle()
 {
 	//data
-	vertex v[3];
+	//vertex v[3];
 	//v[0].pos = DirectX::XMFLOAT4(-0.5f, -0.5f, 0.0f, 1.0f);
 	//v[1].pos = DirectX::XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f);
 	//v[2].pos = DirectX::XMFLOAT4(0.5f, -0.5f, 0.0f, 1.0f);
 	//
-	v[0] = vertex(-0.5f, -0.5f, 0.0f, 1.0f, 1, 0, 0, 1);
-	v[1] = vertex(0.0f, 0.5f, 0.0f, 1.0f, 0, 1, 0, 1);
-	v[2] = vertex(0.5f, -0.5f, 0.0f, 1.0f, 0, 0, 1, 1);
+	//v[0] = vertex(-0.5f, -0.5f, 0.0f, 1.0f, 1, 0, 0, 1);
+	//v[1] = vertex(0.0f, 0.5f, 0.0f, 1.0f, 0, 1, 0, 1);
+	//v[2] = vertex(0.5f, -0.5f, 0.0f, 1.0f, 0, 0, 1, 1);
 
 
 	//v[0].color = DirectX::XMFLOAT4(1, 0, 0, 1);
 	//v[1].color = DirectX::XMFLOAT4(0, 1, 0, 1);
 	//v[2].color = DirectX::XMFLOAT4(0, 0, 1, 1);
 
-	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	/*D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
-	//setup shaders	
-	device->CreateVertexShader(&Trivial_VS, sizeof(Trivial_VS), NULL, &default_pipeline.vertex_shader);
-	device->CreatePixelShader(&Trivial_PS, sizeof(Trivial_PS), NULL, &default_pipeline.pixel_shader);
-	//setup input layout
-	device->CreateInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), Trivial_VS, sizeof(Trivial_VS), &default_pipeline.input_layout.p);
+*/
+	{
+		D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+		{
+			{ "BONECNT", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+		//setup shaders	
+		device->CreateVertexShader(&SkinningAniShader, sizeof(SkinningAniShader), NULL, &default_pipeline.vertex_shader);
+		device->CreatePixelShader(&Trivial_PS, sizeof(Trivial_PS), NULL, &default_pipeline.pixel_shader);
+		//setup input layout
+		device->CreateInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), Trivial_VS, sizeof(Trivial_VS), &default_pipeline.input_layout.p);
+	}
 
 
 	bFBX_CONVERT::clsFBXWrapper obj;
@@ -182,32 +217,14 @@ void pipelineManager::CreateTriangle()
 
 	//std::vector<Mesh> meshes = obj.LoadFBXFile("Run.fbx");
 	//std::vector<Mesh> meshes = obj.LoadFBXFile("battleMage.fbx");
-	std::vector<Mesh> meshes = obj.LoadFBXFile("Teddy_Run.fbx");
+	obj.LoadFBXFile("Teddy_Run.fbx");
+	std::vector<Mesh> meshes = obj.getResult();
+	//RenderObject ro;
+	AddMeshes(meshes);
 
-	//meshes[0]
-	for (unsigned int i = 0; i < meshes.size(); ++i)
-	{
-		//if (meshes[i].verts.size() > 0)
-		{
-			RenderObject ro;
-			ro.mesh = meshes[i];
-			default_pipeline.rendObjects.push_back(ro);
-			/*}
-			else
-			{*/
-			AppendDebugBones(meshes[i].root);//, vertex(0, 0, 0, 0, 1, 1, 1, 1));
-		}
-	}
-	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i)
-	{
 
-		default_pipeline.rendObjects[i].createBuffer(device);
-		default_pipeline.rendObjects[i].createIndex(device);
-	}
-	//vertex buffer
+	////vertex buffer
 	debugObjects.createBuffer(device);
-
-
 }
 
 void pipelineManager::CreatePlane()
@@ -321,94 +338,96 @@ void pipelineManager::InitPipeline(HWND hWnd)
 	srand((unsigned int)std::time(0));
 	//Setup d3d11
 	mhWnd = hWnd;
+	{
+		DXGI_SWAP_CHAIN_DESC swapDesc;
 
-	DXGI_SWAP_CHAIN_DESC swapDesc;
+		ZeroMemory(&swapDesc, sizeof(swapDesc));
 
-	ZeroMemory(&swapDesc, sizeof(swapDesc));
-
-	swapDesc.BufferCount = 1;
-	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDesc.OutputWindow = mhWnd;
-	swapDesc.SampleDesc.Count = 1;
-	swapDesc.Windowed = true;
+		swapDesc.BufferCount = 1;
+		swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapDesc.OutputWindow = mhWnd;
+		swapDesc.SampleDesc.Count = 1;
+		swapDesc.Windowed = true;
 
 #ifdef DEBUG
-	D3D11CreateDeviceAndSwapChain(NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
-		NULL,
-		D3D11_CREATE_DEVICE_DEBUG,
-		NULL,
-		NULL,
-		D3D11_SDK_VERSION,
-		&swapDesc,
-		&swapChain.p,
-		&device.p,
-		NULL,
-		&devContext.p);
+		D3D11CreateDeviceAndSwapChain(NULL,
+			D3D_DRIVER_TYPE_HARDWARE,
+			NULL,
+			D3D11_CREATE_DEVICE_DEBUG,
+			NULL,
+			NULL,
+			D3D11_SDK_VERSION,
+			&swapDesc,
+			&swapChain.p,
+			&device.p,
+			NULL,
+			&devContext.p);
 #else
-	D3D11CreateDeviceAndSwapChain(NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		D3D11_SDK_VERSION,
-		&swapDesc,
-		&swapChain,
-		&device,
-		NULL,
-		&devContext);
+		D3D11CreateDeviceAndSwapChain(NULL,
+			D3D_DRIVER_TYPE_HARDWARE,
+			NULL,
+			NULL,
+			NULL,
+			NULL,
+			D3D11_SDK_VERSION,
+			&swapDesc,
+			&swapChain,
+			&device,
+			NULL,
+			&devContext);
 
 #endif
-
+	}
 	//init back buffer
+	{
+		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&default_pipeline.BackBuffer.p);
 
-	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&default_pipeline.BackBuffer.p);
+		device->CreateRenderTargetView(default_pipeline.BackBuffer.p, NULL, &default_pipeline.render_target.p);
+		//delete pBuffer;
 
-	device->CreateRenderTargetView(default_pipeline.BackBuffer.p, NULL, &default_pipeline.render_target.p);
-	//delete pBuffer;
+		devContext->OMSetRenderTargets(1, &default_pipeline.render_target.p, NULL);
+		RECT rec;
+		//GetWindowRect(mhWnd, &rec);
+		GetClientRect(mhWnd, &rec);
+		//used for viewport
+		int width = rec.right - rec.left;
+		int height = rec.bottom - rec.top;
 
-	devContext->OMSetRenderTargets(1, &default_pipeline.render_target.p, NULL);
-	RECT rec;
-	//GetWindowRect(mhWnd, &rec);
-	GetClientRect(mhWnd, &rec);
-	//used for viewport
-	int width = rec.right - rec.left;
-	int height = rec.bottom - rec.top;
+		memset(&vPort, 0, sizeof(D3D11_VIEWPORT));
+		vPort.TopLeftX = 0;
+		vPort.TopLeftY = 0;
+		vPort.Width = width;
+		vPort.Height = height;
+		vPort.MinDepth = 0;
+		vPort.MaxDepth = 1;
+	
+	
+		float aspectRatio = (float)width / height;
+		float fovAngleY = 70.0f * DirectX::XM_PI / 180.0f;
 
-	memset(&vPort, 0, sizeof(D3D11_VIEWPORT));
-	vPort.TopLeftX = 0;
-	vPort.TopLeftY = 0;
-	vPort.Width = width;
-	vPort.Height = height;
-	vPort.MinDepth = 0;
-	vPort.MaxDepth = 1;
+		InitDepthBuffer(&default_pipeline.depthStencilBuffer.p, width, height);
+		InitDepthView(default_pipeline.depthStencilBuffer.p, &default_pipeline.depthStencilView.p);
 
+		DirectX::XMMATRIX perspectiveMatrix = DirectX::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 1000.0f);
 
-	float aspectRatio = (float)width / height;
-	float fovAngleY = 70.0f * DirectX::XM_PI / 180.0f;
+		DirectX::XMStoreFloat4x4(&bufferData.proj, DirectX::XMMatrixTranspose(perspectiveMatrix));
+	}
+	{
+		static const DirectX::XMVECTORF32 eye = { 1.0f, 3.5f, -2.5f, 0.0f };
 
-	InitDepthBuffer(&default_pipeline.depthStencilBuffer.p, width, height);
-	InitDepthView(default_pipeline.depthStencilBuffer.p, &default_pipeline.depthStencilView.p);
+		static const DirectX::XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+		static const DirectX::XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-	DirectX::XMMATRIX perspectiveMatrix = DirectX::XMMatrixPerspectiveFovLH(fovAngleY, aspectRatio, 0.01f, 1000.0f);
+		DirectX::XMStoreFloat4x4(&bufferData.view, DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up)));
+		DirectX::XMStoreFloat4x4(&Camera, DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixLookAtLH(eye, at, up)));
 
-	DirectX::XMStoreFloat4x4(&bufferData.proj, DirectX::XMMatrixTranspose(perspectiveMatrix));
-	static const DirectX::XMVECTORF32 eye = { 1.0f, 3.5f, -2.5f, 0.0f };
-
-	static const DirectX::XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	static const DirectX::XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
-
-	DirectX::XMStoreFloat4x4(&bufferData.view, DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(eye, at, up)));
-	DirectX::XMStoreFloat4x4(&Camera, DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixLookAtLH(eye, at, up)));
-
-	D3D11_RASTERIZER_DESC desc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
-	desc.FillMode = D3D11_FILL_SOLID;
-	device->CreateRasterizerState(&desc, &default_pipeline.rasterState.p);
-	desc.FillMode = D3D11_FILL_WIREFRAME;
-	device->CreateRasterizerState(&desc, &default_pipeline.debugRasterState.p);
-
+		D3D11_RASTERIZER_DESC desc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
+		desc.FillMode = D3D11_FILL_SOLID;
+		device->CreateRasterizerState(&desc, &default_pipeline.rasterState.p);
+		desc.FillMode = D3D11_FILL_WIREFRAME;
+		device->CreateRasterizerState(&desc, &default_pipeline.debugRasterState.p);
+	}
 	CreateTriangle();
 	CreatePlane();
 }
@@ -681,6 +700,7 @@ void pipelineManager::ClearBuffers()
 
 void pipelineManager::Drawstate()
 {
+#if 0 
 	//Draw stuff
 	//render default_pipeline
 	//devContext->iaset
@@ -693,7 +713,6 @@ void pipelineManager::Drawstate()
 	//bufferData.world[3] = transformPos[3];
 
 	//devContext->UpdateSubresource(cbWorldBuffer.p, 0, NULL, &bufferData, 0, 0);
-	DirectX::XMStoreFloat4x4(&bufferData.view, DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&Camera))));
 
 	////Draw the transforms
 	//devContext->IASetVertexBuffers(0, 1, &transformVBuffer.p, &stride, &offset);
@@ -716,6 +735,10 @@ void pipelineManager::Drawstate()
 	//devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	////devContext->Draw(3, 0);
 	//devContext->DrawInstanced(10024, 1, 0, 0);
+
+#endif
+
+	DirectX::XMStoreFloat4x4(&bufferData.view, DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&Camera))));
 	DrawPipeLine(default_pipeline);
 	if (debugMode)
 	{
@@ -724,7 +747,7 @@ void pipelineManager::Drawstate()
 	//DrawDebugPipeline(debug_Pipeline);
 }
 
-void pipelineManager::DrawPipeLine(const pipelineState &state)
+void pipelineManager::DrawPipeLine(pipelineState &state)
 {
 	UINT stride = sizeof(vertex);
 	UINT offset = 0;
@@ -750,7 +773,14 @@ void pipelineManager::DrawPipeLine(const pipelineState &state)
 		devContext->IASetVertexBuffers(0, 1, &state.rendObjects[i].vertexBuffer, &stride, &offset);
 		devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 		//devContext->IASetIndexBuffer(state.rendObjects[i].wireIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		if (state.rendObjects[i].bufferBoneData) {
+			state.rendObjects[i].bufferBoneData->ratio = aniTimer / state.rendObjects[i].getKeyFrameTotal();
+			state.rendObjects[i].bufferBoneData->aniID = state.rendObjects[i].animID;
+			state.rendObjects[i].bufferBoneData->KeyFrame = state.rendObjects[i].animKeyID;
 
+			devContext->UpdateSubresource(state.rendObjects[i].cbBoneBuffer.p, 0, NULL, state.rendObjects[i].bufferBoneData, 0, 0);
+			devContext->VSSetConstantBuffers(1, 1, &state.rendObjects[i].cbBoneBuffer.p);
+		}
 		//devContext->DrawInstanced(6, 4, 0, 0);
 		devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.indices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
 		//devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.wireIndices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
@@ -813,8 +843,8 @@ pipelineManager::~pipelineManager()
 	//backBuffer.Release();
 	for (unsigned int i = 0; i < default_pipeline.rendObjects.size(); ++i) {
 
-		default_pipeline.rendObjects[i].indexBuffer->Release();
-		default_pipeline.rendObjects[i].vertexBuffer->Release();
+		default_pipeline.rendObjects[i].Cleanup();
+//		default_pipeline.rendObjects[i].vertexBuffer->Release();
 
 	}
 	debugObjects.vertexBuffer->Release();

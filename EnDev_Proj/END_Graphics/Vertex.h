@@ -9,6 +9,10 @@
 
 struct vertex
 {
+	unsigned int bneCnt = 0;
+	unsigned int boneID[4];
+	float boneWeight[4];
+
 	union
 	{
 		struct { float x, y, z, w; };
@@ -62,8 +66,20 @@ struct Bone
 	Bone * parent = nullptr;
 	std::vector<Bone> children;
 	std::vector<Animation> Anims;
-	std::vector<unsigned int> vertIDs;
-	std::vector<float> boneWeight;
+};
+
+struct shaderAni {
+	DirectX::XMMATRIX keyframe[50];
+};
+struct shaderBone {
+	shaderAni anim[15];
+};
+struct cShaderBones
+{
+	unsigned int aniID;
+	unsigned int KeyFrame;
+	float ratio;
+	shaderBone bones[50];
 };
 
 struct Mesh
@@ -76,7 +92,7 @@ struct Mesh
 	//std::vector<unsigned int> wireIndices;
 
 	std::vector<Bone> bones;
-	//int* indices;
+	//int indices;
 };
 
 struct RenderObject
@@ -84,7 +100,7 @@ struct RenderObject
 	DirectX::XMFLOAT4X4 worldMat;
 
 	int instanceCnt = 1;
-	int animID=0;
+	int animID = 0;
 	int animKeyID = 0;
 	Mesh mesh;
 
@@ -92,8 +108,74 @@ struct RenderObject
 	ID3D11Buffer * indexBuffer = nullptr;
 	//ID3D11Buffer * wireIndexBuffer = nullptr;
 
+	CComPtr<ID3D11Buffer> cbBoneBuffer;
+	cShaderBones *bufferBoneData = nullptr;
+
+	//purpose: populate vert bind space pos
+	void invBindPosition() {
+		for (unsigned int i = 0; i < mesh.bones.size(); i++) {
+			//the the first key of every ani, and inv the mat
+			for (unsigned int ani = 0; ani < mesh.bones[i].Anims.size(); ++ani) {
+				//first key, inv it.
+				//only if we have a key
+				if (mesh.bones[i].Anims[ani].keys.size()) {
+					DirectX::XMMATRIX mat = DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(mesh.bones[i].Anims[ani].keys[0].data));
+					mat = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, mat));
+					DirectX::XMFLOAT4X4 temp;
+					DirectX::XMStoreFloat4x4(&temp, mat);
+					float* data = mesh.bones[i].Anims[ani].keys[0].data;
+					//f*@#! hard code
+					data[0] = temp._11;
+					data[1] = temp._12;
+					data[2] = temp._13;
+					data[3] = temp._14;
+					data[4] = temp._21;
+					data[5] = temp._22;
+					data[6] = temp._23;
+					data[7] = temp._24;
+					data[8] = temp._31;
+					data[9] = temp._32;
+					data[10] = temp._33;
+					data[11] = temp._34;
+					data[12] = temp._41;
+					data[13] = temp._42;
+					data[14] = temp._43;
+					data[16] = temp._44;
+
+					using namespace DirectX;
+					for (unsigned int key = 1; mesh.bones[i].Anims[ani].keys.size(); ++key) {
+						temp = XMFLOAT4X4(mesh.bones[i].Anims[ani].keys[key].data);
+
+						mat = DirectX::XMLoadFloat4x4(&temp);
+						mat = DirectX::XMMatrixTranspose((nullptr, mat));
+						
+						DirectX::XMStoreFloat4x4(&temp, mat);
+						float* data = mesh.bones[i].Anims[ani].keys[key].data;
+						//f*@#! hard code
+						data[0] = temp._11;
+						data[1] = temp._12;
+						data[2] = temp._13;
+						data[3] = temp._14;
+						data[4] = temp._21;
+						data[5] = temp._22;
+						data[6] = temp._23;
+						data[7] = temp._24;
+						data[8] = temp._31;
+						data[9] = temp._32;
+						data[10] = temp._33;
+						data[11] = temp._34;
+						data[12] = temp._41;
+						data[13] = temp._42;
+						data[14] = temp._43;
+						data[16] = temp._44;
+					}
+				}
+			}
+		}
+	}
 	void createBuffer(ID3D11Device * device)
 	{
+		invBindPosition();
 		D3D11_BUFFER_DESC desc;
 
 		ZeroMemory(&desc, sizeof(desc));
@@ -108,6 +190,22 @@ struct RenderObject
 		data.pSysMem = mesh.verts.data();
 
 		device->CreateBuffer(&desc, &data, &vertexBuffer);
+
+		if (mesh.bones.size()) {
+			CD3D11_BUFFER_DESC constantBufferDesc(sizeof(cShaderBones), D3D11_BIND_CONSTANT_BUFFER);
+			device->CreateBuffer(&constantBufferDesc, NULL, &cbBoneBuffer.p);
+			bufferBoneData = new cShaderBones();
+			bufferBoneData->aniID = 0;
+			bufferBoneData->KeyFrame = 0;
+			bufferBoneData->ratio = 0;
+			for (unsigned int i = 0; i < mesh.bones.size(); ++i) {
+				for (unsigned int ani = 0; ani < mesh.bones[i].Anims.size(); ++ani) {
+					for (unsigned int key = 0; key < mesh.bones[i].Anims[ani].keys.size(); ++key) {
+						bufferBoneData->bones[i].anim[ani].keyframe[key] = DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(mesh.bones[i].Anims[ani].keys[key].data));
+					}
+				}
+			}
+		}
 		////D3D11_BUFFER_DESC desc;
 
 		//ZeroMemory(&desc, sizeof(desc));
@@ -159,21 +257,39 @@ struct RenderObject
 	}
 	~RenderObject()
 	{
+		//delete bufferBoneData;
+	}
 
+	void Cleanup() {
+		cbBoneBuffer.Release();
+		vertexBuffer->Release();
+		indexBuffer->Release();
+		delete bufferBoneData;
+	}
+	float getKeyFrameTotal() {
+		unsigned int prevFrame = animKeyID - 1;
+		if (prevFrame == 0)
+			prevFrame = mesh.bones[0].Anims[animID].keys.size() - 1;
+		if (prevFrame < animKeyID) {
+			return (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime - mesh.bones[0].Anims[animID].keys[prevFrame].KeyTime);
+		}
+		else {
+			return (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime);
+		}
 	}
 };
 
 struct DebugObjects
 {
 	ID3D11Buffer * vertexBuffer = nullptr;
-	vertex * lineVerts=nullptr;
+	vertex * lineVerts = nullptr;
 	unsigned int MaxCnt;
-	unsigned int CurrentCount=0;
-	
+	unsigned int CurrentCount = 0;
+
 	DebugObjects(unsigned int MaxLineCnt = 1000)
 	{
-		MaxCnt = MaxLineCnt*2;
-		lineVerts = new vertex[MaxLineCnt*2];
+		MaxCnt = MaxLineCnt * 2;
+		lineVerts = new vertex[MaxLineCnt * 2];
 	}
 	~DebugObjects()
 	{

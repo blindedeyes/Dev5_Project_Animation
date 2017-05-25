@@ -3,7 +3,9 @@
 
 struct vertex
 {
-	
+	unsigned int bneCnt = 0;
+	unsigned int boneID[4];
+	float boneWeight[4];
 
 	union
 	{
@@ -57,8 +59,6 @@ struct Bone
 	Bone * parent = nullptr;
 	std::vector<Bone> children;
 	std::vector<Animation> Anims;
-	std::vector<unsigned int> vertIDs;
-	std::vector<float> boneWeight;
 };
 
 struct Mesh

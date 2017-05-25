@@ -17,10 +17,13 @@ namespace bFBX_CONVERT
 	public:
 		DLLHANDLER clsFBXWrapper();
 		DLLHANDLER ~clsFBXWrapper();
-
+		DLLHANDLER std::vector<Mesh> getResult();
 		// Returns a + b  
 		DLLHANDLER char test() { return 'a'; };
-		DLLHANDLER std::vector<Mesh> LoadFBXFile(const char * filename);
+		
+		//DLLHANDLER std::vector<Mesh> LoadFBXFile(const char * filename);
+
+		DLLHANDLER void LoadFBXFile(const char * filename);
 
 		/*DLLHANDLER void PrintTabs();
 		DLLHANDLER void PrintNode(FbxNode* pNode);

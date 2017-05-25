@@ -1,7 +1,13 @@
 struct INPUT_VERTEX
 {
+
+	unsigned int bneCnt : BONECNT;
+	unsigned int4 boneID : BONES;
+	float4 boneWeight : BONEWEIGHT;
+
 	float4 pos : POSITION;
-    float4 color : COLOR;
+	float4 bindpos : BINDPOSITION;
+	float4 color : COLOR;
 };
 
 struct OUTPUT_VERTEX
