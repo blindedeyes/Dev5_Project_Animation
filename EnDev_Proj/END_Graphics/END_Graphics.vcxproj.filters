@@ -16,6 +16,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{ea9287c7-a460-45f9-8834-3dd5e9d02b89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DirectXTK">
+      <UniqueIdentifier>{78b2005f-b26a-4081-b09f-f200f1a5dead}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -42,6 +45,9 @@
     <ClInclude Include="Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>DirectXTK</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -52,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="pipelineManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>DirectXTK</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

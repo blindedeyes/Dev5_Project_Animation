@@ -10,20 +10,24 @@
 struct vertex
 {
 	unsigned int bneCnt = 0;
-	unsigned int boneID[4];
-	float boneWeight[4];
+	unsigned int boneID[4] = { 0 };
+	float boneWeight[4] = { 0 };
 
 	union
 	{
 		struct { float x, y, z, w; };
-		float pos[4];
+		float pos[4] = { 0 };
 	};
 	union
 	{
 		struct { float r, g, b, a; };
-		float color[4];
+		float color[4] = { 0 };
 	};
-
+	union
+	{
+		struct { float nx, ny, nz, nw; };
+		float normal[4] = { 0 };
+	};
 	vertex() : color{ 1,1,1,1 }, pos{ 0,0,0,0 } {
 	};
 	vertex(float _x, float _y, float _z, float _w, float _r, float _g, float _b, float _a)
@@ -31,8 +35,38 @@ struct vertex
 	{
 
 	}
+	//bool operator==(const vertex &v) const
+	//bool operator==(const vertex& rhs) const
+	
 };
-
+inline bool operator==(const vertex& v1, const vertex& v)
+{
+	bool res = false;
+	if (v1.x == v.x && v1.y == v.y && v1.z == v.z && v1.w == v.w) {
+		//same pos
+		if (v1.r == v.r && v1.g == v.g && v1.b == v.b&&v1.a == v.a) {
+			//same color
+			if (v1.nx == v.nx && v1.ny == v.ny && v1.nz == v.nz&& v1.nw == v.nw) {
+				//same normal
+				if (v1.bneCnt == v.bneCnt) {
+					bool boneRes = true;
+					for (unsigned int i = 0; i < v1.bneCnt; ++i) {
+						if (v1.boneID[i] != v.boneID[i]) {
+							boneRes = false;
+							break;
+						}
+						if (v1.boneWeight[i] != v.boneWeight[i]) {
+							boneRes = false;
+							break;
+						}
+					}
+					res = boneRes;
+				}
+			}
+		}
+	}
+	return res;
+}
 
 struct AnimKey {
 	union {
@@ -63,6 +97,7 @@ struct Bone
 		};
 		float matrix[16];
 	};
+	std::string name;
 	Bone * parent = nullptr;
 	std::vector<Bone> children;
 	std::vector<Animation> Anims;
@@ -81,6 +116,8 @@ struct cShaderBones
 
 struct Mesh
 {
+	std::string textName;
+
 	//array of vertexes
 	std::vector<vertex> verts;
 	Bone root;
@@ -106,6 +143,8 @@ struct RenderObject
 	//ID3D11Buffer * wireIndexBuffer = nullptr;
 
 	CComPtr<ID3D11Buffer> cbBoneBuffer;
+	CComPtr<ID3D11Resource> texture;
+	CComPtr<ID3D11ShaderResourceView> srv;
 	cShaderBones *bufferBoneData = nullptr;
 
 	//purpose: populate vert bind space pos
@@ -165,7 +204,7 @@ struct RenderObject
 			device->CreateBuffer(&constantBufferDesc, NULL, &cbBoneBuffer.p);
 			bufferBoneData = new cShaderBones();
 			bufferBoneData->ratio = 0;
-			
+
 		}
 		////D3D11_BUFFER_DESC desc;
 
@@ -181,6 +220,7 @@ struct RenderObject
 		//data.pSysMem = mesh.bones.data();
 
 		//device->CreateBuffer(&desc, &data, &debugVBuffer);
+
 	}
 	void createIndex(ID3D11Device * device)
 	{
@@ -211,10 +251,33 @@ struct RenderObject
 		device->CreateBuffer(&wireframeindexBufferDesc, &wireframeindexBufferData, &wireIndexBuffer);
 		*/
 	}
+	void loadTexture(ID3D11Device* device, ID3D11DeviceContext * devcon) {
+		if (mesh.textName.length() == 0) return;
+		using namespace DirectX;
+		//mesh.textName.c_str()
+		size_t size = mesh.textName.length() + 1;
+		wchar_t * wpath = new wchar_t[size];
+		size_t out;
+		//number of char converted, destination, size of destination, path, size of path
+		mbstowcs_s(&out, wpath, size, mesh.textName.c_str(), size - 1);
+
+		//setup the resources
+		HRESULT res = CreateWICTextureFromFile(device, devcon, wpath, &texture.p, &srv.p);
+		if (res != S_OK)
+		{
+			std::cout << "Wat";
+		}
+		//if (RES != S_OK)
+		//OutputDebugString(L"Fuck");
+
+
+		delete[] wpath;
+
+	}
 
 	RenderObject()
 	{
-
+		DirectX::XMStoreFloat4x4(&worldMat, DirectX::XMMatrixIdentity());
 	}
 	~RenderObject()
 	{
@@ -227,7 +290,7 @@ struct RenderObject
 		indexBuffer->Release();
 		delete bufferBoneData;
 	}
-	float getKeyFrameTotal(float aniTimer) {
+	float getKeyFrameRatio(float aniTimer) {
 		unsigned int prevFrame = animKeyID - 1;
 		if (prevFrame == 0 || prevFrame > mesh.bones[0].Anims[animID].keys.size() - 1)
 			prevFrame = mesh.bones[0].Anims[animID].keys.size() - 1;
@@ -240,10 +303,19 @@ struct RenderObject
 			return aniTimer
 				/ (mesh.bones[0].Anims[animID].keys[animKeyID].KeyTime);
 		}
-		
+
 	}
 };
-
+struct Light
+{
+	DirectX::XMFLOAT4 pos; // : POSITION;
+	DirectX::XMFLOAT4 dir; // : DIRECTION;
+	DirectX::XMFLOAT4 color; // : COLOR;
+	DirectX::XMFLOAT4 radius; // : RADIUS;
+};
+struct ShaderLights {
+	Light lights[2];
+};
 struct DebugObjects
 {
 	ID3D11Buffer * vertexBuffer = nullptr;
@@ -251,7 +323,7 @@ struct DebugObjects
 	unsigned int MaxCnt;
 	unsigned int CurrentCount = 0;
 
-	DebugObjects(unsigned int MaxLineCnt = 1000)
+	DebugObjects(unsigned int MaxLineCnt = 10000)
 	{
 		MaxCnt = MaxLineCnt * 2;
 		lineVerts = new vertex[MaxLineCnt * 2];

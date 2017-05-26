@@ -117,6 +117,22 @@ void pipelineManager::AddMeshes(std::vector<Mesh>& meshes)
 			RenderObject ro;
 			ro.mesh = meshes[i];
 			default_pipeline.rendObjects.push_back(ro);
+			for (unsigned int j = 0; j < meshes[i].verts.size(); ++j) {
+				vertex v = meshes[i].verts[j];
+				v.pos[0] += v.normal[0];
+				v.pos[1] += v.normal[1];
+				v.pos[2] += v.normal[2];
+				v.pos[3] += v.normal[3];
+				vertex v2 = meshes[i].verts[j];
+				v2.color[0] = 1;
+				v2.color[1] = 0;
+				v2.color[2] = 1;
+				v.color[0] = 1;
+				v.color[1] = 0;
+				v.color[2] = 1;
+				debugNormalObjects.AddLine(v2, v);
+
+			}
 			/*}
 			else
 			{*/
@@ -127,7 +143,21 @@ void pipelineManager::AddMeshes(std::vector<Mesh>& meshes)
 	{
 		default_pipeline.rendObjects[i].createBuffer(device);
 		default_pipeline.rendObjects[i].createIndex(device);
+		default_pipeline.rendObjects[i].loadTexture(device,devContext);
 	}
+
+	D3D11_SAMPLER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	//CLAMP EDGES, NOT WRAP
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	desc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	device->CreateSamplerState(&desc, &(this->samp.p));
+	
 }
 void pipelineManager::DebugDrawBones(unsigned int ani, unsigned int key, Mesh &m) {
 	debugObjects.ResetLines();
@@ -200,7 +230,8 @@ void pipelineManager::CreateTriangle()
 			{ "BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 
 		//setup shaders	
@@ -216,10 +247,11 @@ void pipelineManager::CreateTriangle()
 	std::cout << (c);
 
 	//std::vector<Mesh> meshes = 
-	//obj.LoadFBXFile("Run.fbx");
+	//obj.LoadFBXFile("Battle Mage with Rig and textures (1).fbx");
 	//std::vector<Mesh> meshes = 
 	//obj.LoadFBXFile("battleMage.fbx");
 	obj.LoadFBXFile("Teddy_Run.fbx");
+	obj.LoadFBXFile("sword.fbx");
 	std::vector<Mesh> meshes = obj.getResult();
 	//RenderObject ro;
 	AddMeshes(meshes);
@@ -227,6 +259,8 @@ void pipelineManager::CreateTriangle()
 
 	////vertex buffer
 	debugObjects.createBuffer(device);
+	debugNormalObjects.createBuffer(device);
+
 }
 
 void pipelineManager::CreatePlane()
@@ -324,10 +358,20 @@ void pipelineManager::CreatePlane()
 	default_pipeline.rendObjects[default_pipeline.rendObjects.size() - 1].createIndex(device);
 
 	CD3D11_BUFFER_DESC constantBufferDesc(sizeof(cWorldData), D3D11_BIND_CONSTANT_BUFFER);
-
-
-
 	device->CreateBuffer(&constantBufferDesc, NULL, &cbWorldBuffer.p);
+
+	CD3D11_BUFFER_DESC cbuff(sizeof(ShaderLights), D3D11_BIND_CONSTANT_BUFFER);
+	device->CreateBuffer(&cbuff, NULL, &cbLights.p);
+	//Directional
+	cLightsData.lights[0].color = DirectX::XMFLOAT4(1, 0, 1, 0);
+	cLightsData.lights[0].dir = DirectX::XMFLOAT4(0, 0, -1, 0);
+	cLightsData.lights[0].pos = DirectX::XMFLOAT4(1, 0, 0, 0);
+	cLightsData.lights[0].radius = DirectX::XMFLOAT4(1, 0, 0, 0);
+	//Ambient
+	cLightsData.lights[1].color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	cLightsData.lights[1].dir = DirectX::XMFLOAT4(0, 0, 0, 0);
+	cLightsData.lights[1].pos = DirectX::XMFLOAT4(1, 0, 0, 0);
+	cLightsData.lights[1].radius = DirectX::XMFLOAT4(.3, 0, 0, 0);
 
 }
 
@@ -425,6 +469,7 @@ void pipelineManager::InitPipeline(HWND hWnd)
 		DirectX::XMStoreFloat4x4(&Camera, DirectX::XMMatrixInverse(nullptr, DirectX::XMMatrixLookAtLH(eye, at, up)));
 
 		D3D11_RASTERIZER_DESC desc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
+		desc.CullMode = D3D11_CULL_NONE;
 		desc.FillMode = D3D11_FILL_SOLID;
 		device->CreateRasterizerState(&desc, &default_pipeline.rasterState.p);
 		desc.FillMode = D3D11_FILL_WIREFRAME;
@@ -487,14 +532,21 @@ void pipelineManager::Update(float deltaTime)
 
 		if (GetAsyncKeyState(VK_RETURN) & 0x01)
 			debugMode = !debugMode;
+		if (GetAsyncKeyState('N') & 0x01)
+			debugNormals = !debugNormals;
 
-		if (GetAsyncKeyState(VK_SHIFT) & 0x01)
+		if (GetAsyncKeyState(VK_LSHIFT) & 0x01)
 			wireframeMode = !wireframeMode;
 
 	}
 	UpdateAnimation(deltaTime);
 
-
+	for (unsigned int i = 0; i < default_pipeline.rendObjects[0].mesh.bones.size(); ++i) {
+		if (default_pipeline.rendObjects[0].mesh.bones[i].name.find("Weapon") != std::string::npos) {
+			//has it
+			default_pipeline.rendObjects[1].worldMat = DirectX::XMFLOAT4X4(default_pipeline.rendObjects[0].mesh.bones[i].matrix);
+		}
+	}
 }
 
 void pipelineManager::UpdateCamera(float delta_time)
@@ -696,7 +748,7 @@ void pipelineManager::UpdateAnimation(float delta_time)
 
 void pipelineManager::ClearBuffers()
 {
-	float data[4] = { 0.0f, 0.0f,0.0f,0.0f };
+	float data[4] = { .5f, 0.0f,.5f,0.0f };
 	devContext->ClearRenderTargetView(default_pipeline.render_target.p, data);
 	devContext->ClearDepthStencilView(default_pipeline.depthStencilView, D3D11_CLEAR_DEPTH, 1, 0);
 	devContext->OMSetRenderTargets(1, &default_pipeline.render_target.p, default_pipeline.depthStencilView.p);
@@ -749,6 +801,9 @@ void pipelineManager::Drawstate()
 	{
 		DrawDebugObjecs();
 	}
+	if (debugNormals) {
+		DrawDebugNormals();
+	}
 	//DrawDebugPipeline(debug_Pipeline);
 }
 
@@ -763,23 +818,30 @@ void pipelineManager::DrawPipeLine(pipelineState &state)
 		devContext->RSSetState(state.rasterState.p);
 
 	DirectX::XMStoreFloat4x4(&bufferData.world[0], DirectX::XMMatrixIdentity());
-	devContext->UpdateSubresource(cbWorldBuffer.p, 0, NULL, &bufferData, 0, 0);
+	devContext->UpdateSubresource(cbLights.p, 0, NULL, &cLightsData, 0, 0);
 
 	devContext->VSSetShader(state.vertex_shader.p, 0, 0);
-	devContext->VSSetConstantBuffers(0, 1, &cbWorldBuffer.p);
 	devContext->PSSetShader(state.pixel_shader.p, 0, 0);
 	devContext->IASetInputLayout(state.input_layout);
+	devContext->PSSetConstantBuffers(0, 1, &cbLights.p);
+			devContext->PSSetSamplers(0, 1, &samp.p);
 
 	//devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	for (unsigned int i = 0; i < state.rendObjects.size(); ++i)
 	{
+		bufferData.world[0] = state.rendObjects[i].worldMat;
+		devContext->UpdateSubresource(cbWorldBuffer.p, 0, NULL, &bufferData, 0, 0);
+		devContext->VSSetConstantBuffers(0, 1, &cbWorldBuffer.p);
 		devContext->IASetVertexBuffers(0, 1, &state.rendObjects[i].vertexBuffer, &stride, &offset);
 		devContext->IASetIndexBuffer(state.rendObjects[i].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+		devContext->VSSetConstantBuffers(1, 1, &state.rendObjects[i].cbBoneBuffer.p);
+		devContext->PSSetShaderResources(0, 1, &state.rendObjects[i].srv.p);
 		//devContext->IASetIndexBuffer(state.rendObjects[i].wireIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 		if (state.rendObjects[i].bufferBoneData) {
-			state.rendObjects[i].bufferBoneData->ratio = state.rendObjects[i].getKeyFrameTotal(aniTimer);
+			state.rendObjects[i].bufferBoneData->ratio = state.rendObjects[i].getKeyFrameRatio(aniTimer);
 			for (unsigned int b = 0; b < state.rendObjects[i].mesh.bones.size(); ++b) {
 				state.rendObjects[i].bufferBoneData->bones[b].keyframe[0] =
 					DirectX::XMMatrixTranspose(
@@ -796,7 +858,6 @@ void pipelineManager::DrawPipeLine(pipelineState &state)
 				state.rendObjects[i].bufferBoneData->bones[b].keyframe[2] = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(state.rendObjects[i].mesh.bones[b].Anims[state.rendObjects[i].animID].keys[state.rendObjects[i].animKeyID].data)));
 			}
 			devContext->UpdateSubresource(state.rendObjects[i].cbBoneBuffer.p, 0, NULL, state.rendObjects[i].bufferBoneData, 0, 0);
-			devContext->VSSetConstantBuffers(1, 1, &state.rendObjects[i].cbBoneBuffer.p);
 		}
 		//devContext->DrawInstanced(6, 4, 0, 0);
 		devContext->DrawIndexedInstanced(state.rendObjects[i].mesh.indices.size(), state.rendObjects[i].instanceCnt, 0, 0, 0);
@@ -836,6 +897,40 @@ void pipelineManager::DrawDebugObjecs()
 
 	//devContext->DrawInstanced(6, 4, 0, 0);
 	devContext->Draw(debugObjects.CurrentCount, 0);
+
+}
+
+
+void pipelineManager::DrawDebugNormals()
+{
+	if (debugNormalObjects.CurrentCount == 0) return;
+	devContext->ClearDepthStencilView(default_pipeline.depthStencilView, D3D11_CLEAR_DEPTH, 1, 0);
+
+	D3D11_MAPPED_SUBRESOURCE ms1;
+	devContext->Map(debugNormalObjects.vertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms1);   // map the buffer
+	memcpy(ms1.pData, debugNormalObjects.lineVerts, sizeof(vertex)*debugNormalObjects.CurrentCount);
+	// copy the data
+	//context->Map(m_vertexParticleBuffer.p, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms2);   // map the buffer
+	//memcpy(ms2.pData, ms1.pData, sizeof(particleData));           // copy the data
+	devContext->Unmap(debugNormalObjects.vertexBuffer, NULL);
+	//context->Unmap(m_vertexParticleBuffer.p, NULL);
+
+	UINT stride = sizeof(vertex);
+	UINT offset = 0;
+
+	DirectX::XMStoreFloat4x4(&bufferData.world[0], DirectX::XMMatrixIdentity());
+
+	devContext->VSSetShader(default_pipeline.vertex_shader.p, 0, 0);
+	devContext->VSSetConstantBuffers(0, 1, &cbWorldBuffer.p);
+	devContext->PSSetShader(default_pipeline.pixel_shader.p, 0, 0);
+	devContext->IASetInputLayout(default_pipeline.input_layout);
+	devContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	devContext->IASetVertexBuffers(0, 1, &debugNormalObjects.vertexBuffer, &stride, &offset);
+	//devContext->IASetIndexBuffer(state.rendObjects[0].indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	//devContext->DrawInstanced(6, 4, 0, 0);
+	devContext->Draw(debugNormalObjects.CurrentCount, 0);
 
 }
 

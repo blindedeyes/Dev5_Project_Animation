@@ -1,9 +1,27 @@
-﻿  pipelineManager.cpp
-f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(402): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(403): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(552): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
-f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(553): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
-f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(589): warning C4018: '>=': signed/unsigned mismatch
-f:\2017projects\visualstudioproj\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(643): warning C4018: '>=': signed/unsigned mismatch
-  END_Graphics.vcxproj -> F:\2017Projects\VisualStudioProj\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.exe
-  END_Graphics.vcxproj -> F:\2017Projects\VisualStudioProj\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)
+﻿C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\END_Graphics\SkinningAniShader.hlsl(55,17-61): warning X3206: implicit truncation of vector type
+C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\END_Graphics\SkinningAniShader.hlsl(63,9-30): warning X3206: implicit truncation of vector type
+C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\END_Graphics\SkinningAniShader.hlsl(71,5-78): warning X3206: implicit truncation of vector type
+  
+  compilation header save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\END_Graphics\SkinningAniShader.csh
+  compilation object save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\SkinningAniShader.cso
+  compilation header save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\END_Graphics\Trivial_PS.csh
+  compilation object save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\Trivial_PS.cso
+  compilation header save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\END_Graphics\Trivial_VS.csh
+  compilation object save succeeded; see C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\Trivial_VS.cso
+  stdafx.cpp
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\vertex.h(205): warning C4316: 'cShaderBones': object allocated on the heap may not be aligned 16
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\vertex.h(298): warning C4018: '<': signed/unsigned mismatch
+  WICTextureLoader.cpp
+  pipelineManager.cpp
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(374): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(446): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(447): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(604): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(605): warning C4244: 'initializing': conversion from 'LONG' to 'float', possible loss of data
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(641): warning C4018: '>=': signed/unsigned mismatch
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\pipelinemanager.cpp(695): warning C4018: '>=': signed/unsigned mismatch
+  END_Graphics.cpp
+c:\users\lord\documents\visual studio 2015\projects\dev_5_animation\dev5_project_animation\endev_proj\end_graphics\end_graphics.cpp(112): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
+  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.exe
+  END_Graphics.vcxproj -> C:\Users\Lord\Documents\Visual Studio 2015\Projects\Dev_5_Animation\Dev5_Project_Animation\EnDev_Proj\Debug\END_Graphics.pdb (Full PDB)

@@ -33,4 +33,4 @@
 
 //My Defines
 #define winHeight 800
-#define winWidth 600
+#define winWidth 1200

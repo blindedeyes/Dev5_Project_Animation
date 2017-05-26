@@ -99,6 +99,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			//render
 			if (running)
 			{
+				//manager.Update(0.0001f);
 				manager.Update(deltaTime);
 				manager.ClearBuffers();
 				manager.Drawstate();

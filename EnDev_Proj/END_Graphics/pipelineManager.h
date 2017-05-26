@@ -15,9 +15,11 @@ class pipelineManager
 
 	//CComPtr<ID3D11RenderTargetView> targetView;
 	D3D11_VIEWPORT vPort;
-
+	CComPtr<ID3D11SamplerState> samp;
 	pipelineState default_pipeline;
 	pipelineState debug_Pipeline;
+	ShaderLights cLightsData;
+	CComPtr<ID3D11Buffer> cbLights;
 
 	cWorldData bufferData;
 	DirectX::XMFLOAT4X4 Camera;
@@ -25,8 +27,10 @@ class pipelineManager
 	DirectX::XMFLOAT4X4 transformPos[4];
 
 	bool debugMode=false;
+	bool debugNormals = false;
 	bool wireframeMode = false;
 	DebugObjects debugObjects;
+	DebugObjects debugNormalObjects;
 	
 	int animatorState=0;
 	float aniTimer = 0;
@@ -64,6 +68,7 @@ public:
 	void Swap();
 	void DrawPipeLine(pipelineState &state);
 	void DrawDebugObjecs();
+	void DrawDebugNormals();
 
 
 	~pipelineManager();
